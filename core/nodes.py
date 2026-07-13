@@ -78,9 +78,9 @@ def web_search_node(state: PlannerState) -> PlannerState:
     brief = state["brief"]
     llm = get_openai_llm()
     
-    # 1. Extract 3 keywords
+    # 1. Extract 5 hacker queries
     query_prompt = ChatPromptTemplate.from_messages([
-        ("system", "당신은 리서치 전문가입니다. 다음 브리프를 보고 가장 최신의 팩트, 뉴스, 트렌드를 찾기 위한 구글 검색 쿼리 3개를 작성해주세요. 리스트 형태의 JSON으로 반환해야 합니다. 예시: [\"쿼리1\", \"쿼리2\", \"쿼리3\"]"),
+        ("system", "당신은 최고급 트렌드 해커입니다. 브리프를 보고 가장 날 것의 밈과 텐션을 찾기 위한 구글 검색 쿼리 5개를 작성해주세요. 단순 검색이 아닌, X(트위터), 틱톡, 커뮤니티(인스티즈, 더쿠 등)의 실시간 반응을 긁어올 수 있도록 'site:twitter.com 키워드', 'site:tiktok.com/tag 키워드', 'site:instiz.net 키워드' 등의 해커 서치 연산자를 극단적으로 활용하세요. 리스트 형태의 JSON으로 반환해야 합니다. 예시: [\"site:twitter.com 브랜드 반응\", \"site:tiktok.com/tag 브랜드\", \"키워드 트렌드\"]"),
         ("user", "{brief}")
     ])
     
@@ -152,7 +152,7 @@ def web_search_node(state: PlannerState) -> PlannerState:
     try:
         with DDGS() as ddgs:
             for q in queries:
-                results = ddgs.text(q, max_results=3)
+                results = ddgs.text(q, max_results=2)
                 for r in results:
                     web_results.append(f"Title: {r.get('title')}\nBody: {r.get('body')}\nURL: {r.get('href')}")
     except Exception as e:
@@ -708,15 +708,31 @@ def parallel_ideation_node(state: PlannerState) -> PlannerState:
     }
 
 def synthesize_node(state: PlannerState) -> PlannerState:
-    print("--- [NODE] SYNTHESIZE (Zero-Loss Aggregation) ---")
+    print("--- [NODE] SYNTHESIZE (Muad'Dib Prescience + Zero-Loss Aggregation) ---")
     res = state.get("research_data", "")
     ana = state.get("micro_tribe_analysis", "")
     ide = state.get("agile_ideas", "")
     mar = state.get("performance_data", "")
     art = state.get("artistic_references", "")
     
-    # LLM 요약을 완전히 배제하고 문자열을 100% 그대로 이어붙입니다 (Append)
-    blueprint = f"""# 1. 리서치 데이터 (Research)
+    llm = get_openai_llm()
+    
+    # 무앗딥(CSO) 통찰 추출
+    prompt = ChatPromptTemplate.from_messages([
+        ("system", """당신은 듄의 '무앗딥(Muad'Dib)'처럼 과거의 인사이트와 현재의 SNS 흐름을 동시에 꿰뚫어 보는 최고 전략 책임자(CSO)입니다. 
+아래 수집된 리서치(현재 SNS 흐름)와 텐션 분석, 그리고 기초 아이디어들을 바탕으로, **"지금 이 시대가 본질적으로 요구하는 거시적 결핍(Deficiency)과 이를 해결할 단 하나의 날카로운 시대적 전략 명제"**를 3~4문단으로 묵직하게 도출하세요.
+이 통찰은 기획서 전체를 관통하는 영혼(Soul)이 됩니다."""),
+        ("user", "리서치 및 SNS 흐름:\n{res}\n\n타겟/텐션 분석:\n{ana}\n\n도출된 아이디어 가설:\n{ide}")
+    ])
+    
+    prescience_response = (prompt | llm).invoke({"res": res, "ana": ana, "ide": ide})
+    prescience_insight = prescience_response.content
+    
+    # LLM 요약을 최소화하고 문자열을 100% 그대로 이어붙입니다 (Append)
+    blueprint = f"""# 0. 시대적 통찰 및 전략 명제 (Muad'Dib's Prescience)
+{prescience_insight}
+
+# 1. 리서치 데이터 (Research)
 {res}
 
 # 2. 타겟 및 텐션 분석 (Analysis)
