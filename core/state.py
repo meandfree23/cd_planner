@@ -33,6 +33,9 @@ class PlannerState(TypedDict):
     # Idea Phase (V2: 애자일 가설 및 마이크로 모먼츠 여정)
     agile_ideas: str
     
+    # Artistic Layer (V4: 장르 불문 예술적 영감 및 레퍼런스)
+    artistic_references: str
+    
     # Performance Marketing Phase (V3.1)
     performance_data: str
     

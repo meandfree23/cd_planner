@@ -380,36 +380,37 @@ def report_sec3_node(state: PlannerState) -> PlannerState:
     heidi_notes = get_heidi_design_notes()
     
     prompt = ChatPromptTemplate.from_messages([
-        ("system", """당신은 20페이지 분량의 [심층 결과 분석 보고서]를 작성하는 최고 수준의 미래 전략 및 기대 효과 분석가입니다.
+        ("system", """당신은 20페이지 분량의 [심층 결과 분석 보고서]를 작성하는 최고 수준의 미래 전략 및 기대 효과 분석가이자 아트 디렉터입니다.
 
 [절대 금지 사항 - 위반 시 실패]
 1. "A/B 테스트를 하겠다, 캠페인을 실행하겠다, KPI 목표는 이러하다" 와 같은 임시적 마케팅 대행 실행론(방법론)에 그치지 마세요.
 2. 당신은 단순 실행을 단편 기획하는 것이 아니라, 현 분석 결과를 디딤돌 삼아 "도래할 장기적인 가치, 미래 상용화 전망, 비즈니스적 시너지 및 사회경제적 파급 효과"를 거시적이고 전문적으로 전망하는 사람입니다.
 3. [분석의 절대 원칙]: 절대 '추가 정보가 필요하다'며 작성을 포기하거나 거절하지 마세요. 데이터가 부족하더라도 수집된 최소한의 팩트들을 엮어, 명확한 인과관계(Reason Why)가 증명된 논리적 추론으로 내용을 당당하게 100% 완성하세요.
 
-지금은 **[Part 3: 미래 비전 예측 및 창조적 결론 - CLIMAX & IMPACT] (슬라이드 15~20)** 파트입니다.
+지금은 **[Part 3: 예술적 승화 및 미래 비전 - ART & IMPACT] (슬라이드 15~20)** 파트입니다.
 
 작성 규칙:
 1. 슬라이드 구분을 명확히 하되, 반드시 다음 6개의 슬라이드를 누락 없이 각각 모두 상세히 작성하세요. (단 하나의 슬라이드도 생략 금지)
-   - ## Slide 15: [단기적(1~2년 내) 브랜드 로드맵 및 시장 활성화 기대 효과]
-   - ## Slide 16: [중기적(3~5년 내) 비즈니스 성장 및 점유율 예측 분석]
-   - ## Slide 17: [장기적(5년 이상) 거시적 파급 효과 및 미래 가치 전망]
-   - ## Slide 18: [브랜드 성장에 따른 비즈니스 선순환(플라이휠) 메커니즘 분석]
-   - ## Slide 19: [경쟁 브랜드와의 결정적 차별성 및 미래 리스크 극복 전략]
-   - ## Slide 20: [결론: 글로벌/사회적 가치 창출(ESG) 및 생태계 상생 비전]
-2. 각 슬라이드의 [PT 스크립트]는 통계적 수치와 논리적 추론을 바탕으로 한, 가장 밀도 높고 통찰력 있는 장문의 논술(최소 300자 이상)이어야 합니다.
-3. 분석된 결과를 바탕으로, 앞으로 시장, 산업, 또는 사회에 도래할 구체적인 변화와 그로 인한 수치적 파급 효과(결과적 지표)를 창조적으로 예측하여 쐐기를 박으세요.
-4. 미래의 발전 마일스톤이나 구체적인 로드맵/타임라인을 보여주는 `mermaid` 차트를 최소 2개 삽입하세요.
+   - ## Slide 15: [Artistic Reference 1: 브랜드 캠페인을 극대화할 첫 번째 예술적 예시 및 뾰족한 인과성]
+   - ## Slide 16: [Artistic Reference 2: 브랜드 캠페인을 극대화할 두 번째 예술적 예시 및 뾰족한 인과성]
+   - ## Slide 17: [Artistic Reference 3: 브랜드 캠페인을 극대화할 세 번째 예술적 예시 및 뾰족한 인과성]
+   - ## Slide 18: [단기/중기적 비즈니스 성장 로드맵 및 점유율 예측 분석]
+   - ## Slide 19: [장기적 거시 파급 효과 및 경쟁 차별성 방어 전략]
+   - ## Slide 20: [결론: 글로벌/사회적 가치 창출(ESG) 및 궁극적 상생 비전]
+2. **Slide 15~17 지침:** 장르(시, 설치미술, 캠페인 등)를 불문하고 제공된 '예술적 레퍼런스'를 각각 1장씩 단독 배치하세요. 각 예시가 앞선 마케팅/컨셉과 왜 본질적으로 연결되는지 정확하게 논증하세요. (시각적 예시면 시각적 묘사 강화, 과정 중심이면 논리 강조 등)
+3. 각 슬라이드의 [PT 스크립트]는 통계적 수치와 예술적 미학을 바탕으로 한, 가장 밀도 높고 통찰력 있는 장문의 논술(최소 300자 이상)이어야 합니다.
+4. 미래 발전 마일스톤이나 예술적 상호작용 프로세스를 보여주는 `mermaid` 차트를 최소 2개 삽입하세요.
 
 {heidi_notes}"""),
-        ("user", "브리프: {brief}\n\n기초 아이디어 가설:\n{agile_ideas}\n\n추가 지표 데이터:\n{performance_data}")
+        ("user", "브리프: {brief}\n\n기초 아이디어 가설 및 마케팅:\n{agile_ideas}\n{performance_data}\n\n예술적 레퍼런스(Artistic Layer):\n{artistic_references}")
     ])
     
     response = llm.invoke(prompt.format_messages(
         heidi_notes=heidi_notes,
         brief=state["brief"],
         agile_ideas=state.get("agile_ideas", ""),
-        performance_data=state.get("performance_data", "")
+        performance_data=state.get("performance_data", ""),
+        artistic_references=state.get("artistic_references", "")
     ))
     return {"report_sec3": response.content}
 
@@ -635,12 +636,33 @@ def parallel_ideation_node(state: PlannerState) -> PlannerState:
         agile_ideas = f_ide.result()
         perf_data = f_mar.result()
 
+    # 3. Third Phase: Art Director (Sequential, based on Idea & Marketing)
+    def run_art_director():
+        prompt = ChatPromptTemplate.from_messages([
+            ("system", """당신은 구찌, 젠틀몬스터 등의 캠페인을 총괄했던 하이엔드 아트 디렉터입니다. 
+마케터와 CD가 도출한 기획안을 절대 수정하지 마세요. 대신, 이 기획안의 실행(Execution) 단계를 한 차원 예술적으로 끌어올릴 수 있는 **구체적인 예술적 예시(Reference) 3가지**를 제안하세요.
+
+[예시 작성 절대 원칙]
+1. 장르에 경계가 없습니다. 시(Poetry), 디젤의 'Be Stupid' 같은 패션 캠페인, 젠틀몬스터의 설치미술, 현대무용 등 어떤 것이든 가능합니다.
+2. 단, 제안한 예시의 이유는 **반드시 앞서 도출된 '크리에이티브 가설' 및 '마케팅 방향'의 뾰족함과 본질적으로 완벽하게 연결**되어야 합니다. (이것이 가장 중요)
+3. 3가지 예시를 작성할 때, 각 예시의 특성에 맞게 서술을 강화하세요:
+   - 시각적인 예시라면 '시각적 이미지'를 극대화하여 묘사
+   - 과정이 중요한 예시라면 '과정을 설명하는 논리'를 강조
+   - 컨셉추얼한 예시라면 '컨셉 그 자체'를 강조
+**[중요] 반드시 모든 문장과 단어를 한국어(Korean)로 상세하게 작성하세요.**"""),
+            ("user", "브리프: {brief}\n\n도출된 아이디어:\n{agile_ideas}\n\n마케팅 전략:\n{perf_data}")
+        ])
+        return (prompt | llm).invoke({"brief": brief, "agile_ideas": agile_ideas, "perf_data": perf_data}).content
+
+    artistic_references = run_art_director()
+
     return {
         "research_data": research_data,
         "micro_tribe_analysis": micro_tribe,
         "cultural_tensions": micro_tribe, # merging concept for backward compatibility
         "agile_ideas": agile_ideas,
-        "performance_data": perf_data
+        "performance_data": perf_data,
+        "artistic_references": artistic_references
     }
 
 def synthesize_node(state: PlannerState) -> PlannerState:
@@ -649,6 +671,7 @@ def synthesize_node(state: PlannerState) -> PlannerState:
     ana = state.get("micro_tribe_analysis", "")
     ide = state.get("agile_ideas", "")
     mar = state.get("performance_data", "")
+    art = state.get("artistic_references", "")
     
     # LLM 요약을 완전히 배제하고 문자열을 100% 그대로 이어붙입니다 (Append)
     blueprint = f"""# 1. 리서치 데이터 (Research)
@@ -661,7 +684,10 @@ def synthesize_node(state: PlannerState) -> PlannerState:
 {ide}
 
 # 4. 퍼포먼스 마케팅 및 매체 전략 (Marketing)
-{mar}"""
+{mar}
+
+# 5. 예술적 레퍼런스 및 승화 전략 (Artistic Layer)
+{art}"""
     
     return {"blueprint": blueprint}
 
