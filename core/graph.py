@@ -1,6 +1,6 @@
 from langgraph.graph import StateGraph, END
 from core.state import PlannerState
-from core.nodes import web_search_node, parallel_ideation_node, synthesize_node, hook_strategy_node, parallel_report_node, report_merge_node, qa_judge_node, ppt_code_node, evaluation_node
+from core.nodes import web_search_node, parallel_ideation_node, synthesize_node, hook_strategy_node, parallel_report_node, report_merge_node, qa_judge_node, ppt_code_node, evaluation_node, evolution_proof_node
 
 def build_planner_graph():
     """CD 플래너 에이전트의 워크플로우 그래프를 생성하고 컴파일합니다. (병렬 멀티 에이전트 적용)"""
@@ -16,6 +16,7 @@ def build_planner_graph():
     workflow.add_node("qa_judge", qa_judge_node)
     workflow.add_node("ppt_code", ppt_code_node)
     workflow.add_node("evaluation", evaluation_node)
+    workflow.add_node("evolution_proof", evolution_proof_node)
     
     workflow.set_entry_point("web_search")
     workflow.add_edge("web_search", "parallel_ideation")
@@ -45,17 +46,18 @@ def build_planner_graph():
             print(f"--- [ROUTER] Score below 9.0. Triggering Revision {revision_count + 1} / 2 ---")
             return "parallel_ideation"
         else:
-            print("--- [ROUTER] Score acceptable or max revisions reached. Finishing. ---")
-            return END
+            print("--- [ROUTER] Score acceptable or max revisions reached. Proceeding to Evolution Proof. ---")
+            return "evolution_proof"
 
     workflow.add_conditional_edges(
         "evaluation",
         should_revise,
         {
             "parallel_ideation": "parallel_ideation",
-            END: END
+            "evolution_proof": "evolution_proof"
         }
     )
+    workflow.add_edge("evolution_proof", END)
     
     app = workflow.compile()
     

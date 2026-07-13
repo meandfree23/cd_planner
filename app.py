@@ -221,8 +221,8 @@ with tab1:
                 report_expander = st.expander("5. Final Report", expanded=True)
                 qa_expander = st.expander("🧐 심사위원 피드백 (QA)", expanded=True)
                 ppt_code_expander = st.expander("6. PPT Parsing Code")
-                eval_expander = st.expander("👩‍⚖️ 프리젠테이션 심사위원 검수", expanded=True)
-                
+                eval_expander = st.expander("⚖️ 다면 심사 위원회 검수 (Multi-Jury)", expanded=True)
+                evolution_expander = st.expander("📈 자가 학습 진화 리포트 (Evolution Proof)", expanded=True)
             try:
                 status_text.info("에이전트 파이프라인 시작 중...")
                 
@@ -292,9 +292,14 @@ with tab1:
                                     st.code(value.get("ppt_code", ""), language="text")
                                     
                             elif key == "evaluation":
-                                status_text.success("✨ 20페이지 기획서, PPT 압축 코드 및 심사 검수가 모두 완료되었습니다! (보관함 자동 저장)")
+                                status_text.info("⚖️ 다면 심사 위원회의 검수가 완료되었습니다. 진화 증명 여부를 판단합니다...")
                                 with eval_expander:
                                     st.markdown(value.get("evaluation_report", ""))
+                                    
+                            elif key == "evolution_proof":
+                                status_text.success("✨ 20페이지 기획서, 다면 심사 및 자가 학습 진화 증명이 모두 완료되었습니다! (보관함 자동 저장)")
+                                with evolution_expander:
+                                    st.markdown(value.get("evolution_proof", ""))
                                 
                 # 리포트 파일 및 PPT 코드 자동 저장 (버그 픽스: full_state 사용)
                 if full_state and "final_report" in full_state and "ppt_code" in full_state:

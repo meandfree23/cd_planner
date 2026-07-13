@@ -53,6 +53,8 @@ class PlannerState(TypedDict):
     # Evaluation Phase (V3.2: 심사위원 에이전트 퀄리티 검수)
     evaluation_report: str
     
-    # Auto-Reflection Loop (V6.0)
+    # Auto-Reflection Loop & Evolution Proof (V6.0)
     revision_count: int
     evaluation_feedback: str
+    v1_report: str
+    evolution_proof: str

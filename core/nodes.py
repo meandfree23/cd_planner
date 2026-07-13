@@ -585,52 +585,105 @@ Slide 2: [기존 시장/경쟁 환경의 한계와 구조적 문제점]
     return {"ppt_code": code_content}
 
 def evaluation_node(state: PlannerState) -> PlannerState:
-    print("--- [NODE] PRESENTATION EVALUATOR & JUDGE ---")
+    print("--- [NODE] MULTI-JURY EVALUATION (다면 심사 위원회) ---")
     llm = get_openai_llm()
+    brief = state["brief"]
+    goal = state.get("goal", "")
     
     prompt = ChatPromptTemplate.from_messages([
-        ("system", """당신은 광고 대행사의 프레젠테이션(PT)을 엄격하게 심사하는 15년 차 시니어 심사위원(Judge) 에이전트입니다.
-제출된 광고 기획서(Report)와 PPT 파싱 코드를 면밀히 검수하고, 다음 기준에 따라 날카로운 피드백과 지적 사항을 담은 [프리젠테이션 심사 보고서]를 작성해주세요.
+        ("system", """당신은 세계 최고 권위의 '칸 라이언즈(Cannes Lions) 급 다면 심사 위원회'입니다.
+프로젝트 목표(Goal)에 따라 3인의 심사위원 가중치를 자동 조정하여 엄격하게 평가하세요.
 
-심사 기준:
-1. **논리적 타당성**: 서론(문제 제기) - 본론(트라이브 분석 및 솔루션) - 결론(퍼포먼스 마케팅 및 미래 지표)으로 이어지는 흐름에 논리적 모순이나 약점이 없는가?
-2. **크리에이티브의 참신성**: 크리에이티브 메시지나 애자일 가설이 뻔하지 않고 타겟의 심리를 날카롭게 찌르고 있는가?
-3. **데이터 기반의 구체성**: 통계치(예: 투표율 61%, CTR 등)나 벤치마크 숫자들이 구체적으로 제시되었으며, 타당한 근거가 있는가?
-4. **시각화 레이아웃 적합성**: mermaid 차트(파이 차트, 간트 차트 등)의 구성과 배치가 슬라이드의 흐름과 어울리는가?
+[심사위원 3인 페르소나]
+1. 🎨 칸 광고제 크리에이티브 심사위원장 (Art/Creative): 아이디어의 참신성, 타겟 텐션을 찌르는 파괴력 검증.
+2. 📈 글로벌 퍼포먼스 마케팅 디렉터 (ROI/Data): 통계적 타당성, KPI 구체성, 예산 대비 전환율 논리 검증.
+3. 🔥 Z세대 밈 & 트렌드 해커 (Era/Trend): 시대의 흐름, 바이럴 폭발력, SNS 생태계 및 문화적 적합성 검증.
 
-심사 보고서 마크다운 템플릿:
-# 👩‍⚖️ 프리젠테이션 심사위원 검수 보고서
+[가중치 부여 가이드 (10점 만점 기준)]
+목표(Goal)가 "{goal}" 입니다. 이 목표에 가장 결정적인 역할을 하는 심사위원의 비중을 높여서 평가를 진행하세요.
+
+[출력 양식 (마크다운)]
+# ⚖️ 다면 심사 위원회(Multi-Jury) 검수 보고서
 
 ## 1. 📊 종합 평가 및 심사 평점
-- **종합 점수**: [점수] / 10
-- **한 줄 심사평**: [기획서를 관통하는 날카로운 한 줄 요약평]
+- **종합 점수**: [점수] / 10 (가중치 합산 결과)
+- **한 줄 심사평**: [세 심사위원의 의견을 종합한 촌철살인 한 줄 평]
 
-## 2. 🌟 주요 강점 (Points of Praise)
-- [기획서에서 특히 뛰어난 점 2~3가지를 명확한 근거와 함께 칭찬]
+## 2. 👩‍⚖️ 심사위원별 상세 피드백
+### 🎨 크리에이티브 심사위원장 (비중: XX%)
+- **강점**: [평가 내용]
+- **⚠️ 치명적 약점 및 수정 지시**: [구체적 지적]
 
-## 3. ⚠️ 치명적 약점 및 문제점 발견 (Problems Found)
-- [논리적 비약이나 약점, 보완이 필요한 부분 2~3가지를 날카롭게 지적]
+### 📈 퍼포먼스 마케팅 디렉터 (비중: XX%)
+- **강점**: [평가 내용]
+- **⚠️ 치명적 약점 및 수정 지시**: [구체적 지적]
 
-## 4. 🛠️ 즉시 반영 가능한 수정 요청 사항 (Revise Requests)
-- [사용자나 다른 에이전트가 바로 수정/보완할 수 있는 구체적인 지시 사항 및 대안 제안]
+### 🔥 Z세대 트렌드 해커 (비중: XX%)
+- **강점**: [평가 내용]
+- **⚠️ 치명적 약점 및 수정 지시**: [구체적 지적]
+
+## 3. 🛠️ 다음 루프를 위한 최종 수정 명령 (Revise Requests)
+- [시스템이 재작성 시 반드시 반영해야 할 구체적이고 명확한 행동 지침 3가지]
 
 존댓말로 격식 있고 날카로운 카리스마를 담아 작성해주세요."""),
         ("user", "캠페인 브리프: {brief}\n\n최종 기획서 원문:\n{final_report}\n\nPPT 파싱 코드:\n{ppt_code}")
     ])
     
     response = llm.invoke(prompt.format_messages(
-        brief=state["brief"],
+        goal=goal,
+        brief=brief,
         final_report=state.get("final_report", ""),
         ppt_code=state.get("ppt_code", "")
     ))
     
     current_revision = state.get("revision_count", 0)
     
+    # 1회차(revision_count == 0)일 경우 초안을 보존
+    v1_report = state.get("v1_report", "")
+    if current_revision == 0:
+        v1_report = state.get("final_report", "")
+        
     return {
         "evaluation_report": response.content,
         "evaluation_feedback": response.content,
-        "revision_count": current_revision + 1
+        "revision_count": current_revision + 1,
+        "v1_report": v1_report
     }
+
+def evolution_proof_node(state: PlannerState) -> PlannerState:
+    print("--- [NODE] EVOLUTION PROOF (진화 증명 에이전트) ---")
+    llm = get_openai_llm()
+    
+    revision_count = state.get("revision_count", 0)
+    # 만약 재작업(루프)이 한 번도 발생하지 않고 초안이 곧 최종안(점수 9점 이상 통과)이라면, 진화 증명 생략
+    if revision_count <= 1:
+        return {"evolution_proof": "✨ **[초안 통과]** 다면 심사 위원회의 엄격한 기준(9.0점 이상)을 단번에 통과하여, 별도의 재작성(진화) 없이 확정된 마스터피스입니다."}
+        
+    prompt = ChatPromptTemplate.from_messages([
+        ("system", """당신은 시스템의 투명성을 담당하는 '진화 증명(Evolution Proof) 에이전트'입니다.
+AI가 '심사위원의 지적'을 받아들여 '초안(V1)'에서 '최종안'으로 넘어올 때, 겉치레가 아니라 **실제로 무엇이 어떻게 개선되었는지(Delta)**를 사용자에게 명백하게 증명해야 합니다.
+
+[출력 양식 (마크다운)]
+이 기획서는 다면 심사 위원회의 뼈아픈 지적을 수용하여 다음과 같이 진화했습니다.
+
+## 1. 🔍 심사위원 지적 vs 최종안의 변화 (Delta)
+- **지적 사항 A**: [퍼포먼스 마케팅 디렉터 등이 지적했던 내용 요약]
+  - **✨ 진화된 결과**: [최종안의 어떤 슬라이드, 어떤 문장에 구체적인 수치/논리가 추가되었는지 팩트 위주로 증명]
+- **지적 사항 B**: [트렌드 해커 등이 지적했던 내용 요약]
+  - **✨ 진화된 결과**: [어떻게 개선되었는지 구체적으로 증명]
+
+## 2. 💡 AI 자기 객관화 총평
+- [이 자가 학습 루프를 통해 기획서의 방어율과 퀄리티가 어떻게 높아졌는지 2~3줄로 요약]"""),
+        ("user", "다면 심사 위원회 지적사항:\n{feedback}\n\n초안(V1) 원문:\n{v1_report}\n\n최종안 원문:\n{final_report}")
+    ])
+    
+    response = llm.invoke(prompt.format_messages(
+        feedback=state.get("evaluation_feedback", ""),
+        v1_report=state.get("v1_report", ""),
+        final_report=state.get("final_report", "")
+    ))
+    
+    return {"evolution_proof": response.content}
 
 
 # =====================================================================
