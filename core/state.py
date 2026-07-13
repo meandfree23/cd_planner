@@ -43,6 +43,7 @@ class PlannerState(TypedDict):
     report_sec1: str
     report_sec2: str
     report_sec3: str
+    report_appendix: str
     final_report: str
     qa_feedback: str
     

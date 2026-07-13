@@ -300,10 +300,10 @@ def report_sec1_node(state: PlannerState) -> PlannerState:
 2. 겉핥기식의 요약된 문장을 쓰지 마세요.
 3. [분석의 절대 원칙]: 절대 '추가 정보가 필요하다'며 작성을 포기하거나 거절하지 마세요. 데이터가 부족하더라도 수집된 최소한의 팩트들을 엮어, 명확한 인과관계(Reason Why)가 증명된 논리적 추론으로 내용을 당당하게 100% 완성하세요.
 
-지금은 **[Part 1: 현상 분석 및 원인 규명 - HOOK & ATTENTION] (슬라이드 1~7)** 파트입니다.
+지금은 **[Part 1: 현상 분석 및 원인 규명 - HOOK & ATTENTION]** 파트입니다.
 
 작성 규칙:
-1. 슬라이드 구분을 명확히 하되, 반드시 다음 7개의 슬라이드를 누락 없이 각각 모두 상세히 작성하세요. (단 하나의 슬라이드도 생략 금지)
+1. 슬라이드 개수에 엄격한 제한은 없습니다. 내용이 풍부하다면 5~10장 이상으로 자유롭게 확장하세요. 다음 핵심 내용들이 유기적으로 연결되도록 슬라이드(## Slide X)를 구성하세요:
    - ## Slide 1: [브랜드/주제 소개 및 탄생 배경]
    - ## Slide 2: [기존 시장/경쟁 환경의 한계와 고질적 문제점]
    - ## Slide 3: [브랜드/제품만의 독보적 기술 또는 전략적 특장점]
@@ -345,10 +345,10 @@ def report_sec2_node(state: PlannerState) -> PlannerState:
 2. 겉핥기식의 뻔한 설명을 배제하고, 독창적이고 심도 깊은 통찰력을 보여주세요.
 3. [분석의 절대 원칙]: 절대 '추가 정보가 필요하다'며 작성을 포기하거나 거절하지 마세요. 데이터가 부족하더라도 수집된 최소한의 팩트들을 엮어, 명확한 인과관계(Reason Why)가 증명된 논리적 추론으로 내용을 당당하게 100% 완성하세요.
 
-지금은 **[Part 2: 타겟 집단의 심리 및 구조적 갈등 - DEEP PERSUASION] (슬라이드 8~14)** 파트입니다.
+지금은 **[Part 2: 타겟 집단의 심리 및 구조적 갈등 - DEEP PERSUASION]** 파트입니다.
 
 작성 규칙:
-1. 슬라이드 구분을 명확히 하되, 반드시 다음 7개의 슬라이드를 누락 없이 각각 모두 상세히 작성하세요. (단 하나의 슬라이드도 생략 금지)
+1. 슬라이드 개수에 제한은 없습니다. 전략이 깊다면 5~10장 이상으로 자유롭게 확장하세요. 다음 핵심 내용들이 촘촘하게 전개되도록 슬라이드(## Slide X)를 구성하세요:
    - ## Slide 8: [주요 타겟 집단(마이크로 트라이브) 프로파일링 분석]
    - ## Slide 9: [타겟 집단이 겪고 있는 본질적인 미충족 요구(Unmet Needs)]
    - ## Slide 10: [시장과 타겟 사이에 존재하는 사회적/문화적 텐션(Tension) 해부]
@@ -387,10 +387,10 @@ def report_sec3_node(state: PlannerState) -> PlannerState:
 2. 당신은 단순 실행을 단편 기획하는 것이 아니라, 현 분석 결과를 디딤돌 삼아 "도래할 장기적인 가치, 미래 상용화 전망, 비즈니스적 시너지 및 사회경제적 파급 효과"를 거시적이고 전문적으로 전망하는 사람입니다.
 3. [분석의 절대 원칙]: 절대 '추가 정보가 필요하다'며 작성을 포기하거나 거절하지 마세요. 데이터가 부족하더라도 수집된 최소한의 팩트들을 엮어, 명확한 인과관계(Reason Why)가 증명된 논리적 추론으로 내용을 당당하게 100% 완성하세요.
 
-지금은 **[Part 3: 예술적 승화 및 미래 비전 - ART & IMPACT] (슬라이드 15~20)** 파트입니다.
+지금은 **[Part 3: 예술적 승화 및 미래 비전 - ART & IMPACT]** 파트입니다.
 
 작성 규칙:
-1. 슬라이드 구분을 명확히 하되, 반드시 다음 6개의 슬라이드를 누락 없이 각각 모두 상세히 작성하세요. (단 하나의 슬라이드도 생략 금지)
+1. 슬라이드 개수에 제한은 없습니다. 내용이 풍부하다면 자유롭게 확장하세요. 단, 퍼포먼스 마케팅/숫자 지표는 이 파트에서 절대 다루지 마세요(별첨으로 빠집니다). 다음 핵심 내용들이 전개되도록 슬라이드(## Slide X)를 구성하세요:
    - ## Slide 15: [Artistic Reference 1: 브랜드 캠페인을 극대화할 첫 번째 예술적 예시 및 뾰족한 인과성]
    - ## Slide 16: [Artistic Reference 2: 브랜드 캠페인을 극대화할 두 번째 예술적 예시 및 뾰족한 인과성]
    - ## Slide 17: [Artistic Reference 3: 브랜드 캠페인을 극대화할 세 번째 예술적 예시 및 뾰족한 인과성]
@@ -414,6 +414,37 @@ def report_sec3_node(state: PlannerState) -> PlannerState:
     ))
     return {"report_sec3": response.content}
 
+def report_appendix_node(state: PlannerState) -> PlannerState:
+    print("--- [NODE] REPORT APPENDIX: 퍼포먼스 마케팅 별첨 ---")
+    llm = get_openai_llm()
+    heidi_notes = get_heidi_design_notes()
+    
+    prompt = ChatPromptTemplate.from_messages([
+        ("system", """당신은 [심층 결과 분석 보고서]의 마지막을 장식하는 최고 수준의 퍼포먼스 마케팅 디렉터입니다.
+
+지금은 기획서의 맨 마지막 **[별첨(Appendix): 퍼포먼스 마케팅 및 매체/RFP 전략]** 파트입니다.
+앞선 메인 기획서의 예술적이고 거시적인 비전을 해치지 않도록, 숫자가 중심이 되는 마케팅 전략만을 따로 빼서 전문적으로 정리합니다.
+
+작성 규칙:
+1. 슬라이드 제목은 '## Slide X' 대신 '## Appendix X: [제목]' 형식으로 작성하세요.
+2. 분량은 자유롭되 최소 3~5장 이상의 Appendix 슬라이드를 구성하세요.
+3. 반드시 포함되어야 할 내용:
+   - 타겟별 매체 믹스(Media Mix) 및 도달 전략
+   - 핵심 성과 지표(KPI, 예상 CPC/CTR) 및 데이터 검증 목표
+   - RFP 대응, 예산 효율성, A/B 테스트 운영 계획
+4. 각 슬라이드의 [PT 스크립트]는 실무적이고 구체적인 숫자를 바탕으로 최소 300자 이상 작성하세요.
+
+{heidi_notes}"""),
+        ("user", "브리프: {brief}\n\n퍼포먼스 마케팅 전략 데이터:\n{performance_data}")
+    ])
+    
+    response = llm.invoke(prompt.format_messages(
+        heidi_notes=heidi_notes,
+        brief=state["brief"],
+        performance_data=state.get("performance_data", "")
+    ))
+    return {"report_appendix": response.content}
+
 
 def report_merge_node(state: PlannerState) -> PlannerState:
     print("--- [NODE] REPORT MERGE ---")
@@ -421,10 +452,11 @@ def report_merge_node(state: PlannerState) -> PlannerState:
     sec1 = state.get("report_sec1", "")
     sec2 = state.get("report_sec2", "")
     sec3 = state.get("report_sec3", "")
+    appx = state.get("report_appendix", "")
     
     final_markdown = f"""# 📈 [심층 프레젠테이션] CD 플래닝 마스터 보고서
 
-> 본 보고서는 통계 데이터와 시각화 차트를 포함한 20장 분량의 프리젠테이션 대본 양식으로 작성되었습니다.
+> 본 보고서는 통계 데이터와 시각화 차트를 포함한 프리젠테이션 대본 양식으로 작성되었습니다.
 
 {sec1}
 
@@ -435,6 +467,11 @@ def report_merge_node(state: PlannerState) -> PlannerState:
 ---
 
 {sec3}
+
+---
+
+# 📑 [별첨] 퍼포먼스 마케팅 및 매체 전략 (Appendix)
+{appx}
 """
     return {"final_report": final_markdown}
 
@@ -467,7 +504,7 @@ def qa_judge_node(state: PlannerState) -> PlannerState:
     else:
         print("[QA JUDGE] 👔 논리적인 15년 차 시니어 심사위원 출격!")
         judge_persona = """당신은 수십 년 경력의 날카롭고 냉철한 '프리젠테이션 심사위원(QA 에이전트)'입니다.
-제출된 20페이지 분량의 기획서를 꼼꼼히 평가하세요.
+제출된 전체 기획서 및 별첨(Appendix)을 꼼꼼히 평가하세요.
 
 작성 규칙:
 1. 칭찬은 1줄로 짧게 끝내고, 기획서의 논리적 비약, 설득력 부족, 타겟 텐션과의 연결성 부족 등 '약점(Weakness)'을 날카롭게 지적하세요.
@@ -501,14 +538,14 @@ def ppt_code_node(state: PlannerState) -> PlannerState:
    - `[설명]` 태그 바로 아래줄: 3단계 본문 설명 (2줄 이내, 약 30자 내외로 핵심 정보를 알차고 밀도 있게 나열)
    - `[PT 스크립트]` 태그 바로 아래줄: 발표자가 읽을 상세한 설명 (최소 300자 이상, 기획서 원본의 데이터를 절대 요약하지 마세요)
 3. 원본 기획서에 포함된 모든 분석 데이터, 통계 수치, 핵심 지표 등을 누락 없이 충실하게 적어 넣으세요.
-4. **반드시 Slide 1부터 Slide 20까지 총 20개의 슬라이드 전체를 단 하나도 생략하거나 축약하지 말고 차례대로 100% 전부 매핑하여 출력하세요.** 모델의 출력 토큰 한계에 도달하지 않도록 텍스트를 구조화하되, 슬라이드의 개수는 반드시 정확하게 20개여야 합니다.
+4. **페이지 수에 엄격한 제한이 없습니다(20장~30장 이상 가능). Slide 1부터 마지막 Slide, 그리고 Appendix 1부터 마지막 Appendix까지, 기획서 원문에 있는 모든 슬라이드를 100% 하나도 빠짐없이 매핑하여 출력하세요.** 모델의 출력 토큰 한계에 도달하지 않도록 텍스트를 구조화하되, 슬라이드를 임의로 축소하지 마세요.
 
 {heidi_notes}
 {feedback_context}
 
 반드시 마크다운 코드블록(```text ... ```) 안에 담아주세요.
 
-출력 포맷 예시 (이 구조를 반복하여 20장의 슬라이드를 완벽하게 구성하세요):
+출력 포맷 예시 (이 구조를 반복하여 모든 슬라이드와 Appendix를 완벽하게 구성하세요):
 # [보고서를 관통하는 대주제 제목]
 
 Slide 1: [브랜드/프로젝트 핵심 개요 및 존재 가치]
@@ -783,22 +820,32 @@ def parallel_report_node(state: PlannerState) -> PlannerState:
 
     def run_sec3():
         prompt = ChatPromptTemplate.from_messages([
-            ("system", "당신은 기획서 작성 전문가입니다. 전체 블루프린트 중에서 **'4. 퍼포먼스 마케팅 및 매체 전략 (Marketing)'에 해당하는 내용만을 정확히 추출**하세요. 단, 추출한 해당 파트의 텍스트는 **단 한 글자도 요약하거나 생략하지 말고 100% 보존**하여 마크다운 포맷으로 정리해야 합니다. 리서치나 아이디어 파트의 내용은 절대 가져오지 마세요."),
+            ("system", "당신은 기획서 작성 전문가입니다. 전체 블루프린트 중에서 **'5. 예술적 레퍼런스 및 승화 전략 (Artistic Layer)'에 해당하는 내용만을 정확히 추출**하세요. 단, 추출한 해당 파트의 텍스트는 **단 한 글자도 요약하거나 생략하지 말고 100% 보존**하여 마크다운 포맷으로 정리해야 합니다. 마케팅이나 다른 파트의 내용은 절대 가져오지 마세요."),
             ("user", "블루프린트: {blueprint}")
         ])
         return (prompt | llm).invoke({"blueprint": blueprint}).content
 
-    with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
+    def run_appendix():
+        prompt = ChatPromptTemplate.from_messages([
+            ("system", "당신은 기획서 작성 전문가입니다. 전체 블루프린트 중에서 **'4. 퍼포먼스 마케팅 및 매체 전략 (Marketing)'에 해당하는 내용만을 정확히 추출하여 마크다운 포맷으로 정리하세요.** (이 내용은 나중에 별첨 슬라이드로 변환됩니다.)"),
+            ("user", "블루프린트: {blueprint}")
+        ])
+        return (prompt | llm).invoke({"blueprint": blueprint}).content
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
         f1 = executor.submit(run_sec1)
         f2 = executor.submit(run_sec2)
         f3 = executor.submit(run_sec3)
+        f_appx = executor.submit(run_appendix)
         
         sec1 = f1.result()
         sec2 = f2.result()
         sec3 = f3.result()
+        appx = f_appx.result()
 
     return {
         "report_sec1": sec1,
         "report_sec2": sec2,
-        "report_sec3": sec3
+        "report_sec3": sec3,
+        "report_appendix": appx
     }
