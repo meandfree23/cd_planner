@@ -623,7 +623,14 @@ def evaluation_node(state: PlannerState) -> PlannerState:
         final_report=state.get("final_report", ""),
         ppt_code=state.get("ppt_code", "")
     ))
-    return {"evaluation_report": response.content}
+    
+    current_revision = state.get("revision_count", 0)
+    
+    return {
+        "evaluation_report": response.content,
+        "evaluation_feedback": response.content,
+        "revision_count": current_revision + 1
+    }
 
 
 # =====================================================================
@@ -634,21 +641,25 @@ def parallel_ideation_node(state: PlannerState) -> PlannerState:
     print("--- [NODE] HYBRID IDEATION (Research/Analysis -> Idea/Marketing) ---")
     brief = state["brief"]
     web_context = state.get("web_context", "")
+    eval_feedback = state.get("evaluation_feedback", "")
+    
+    feedback_context = f"\n[🚨 자아비판 및 수정 지시]\n지난번 심사위원 검수에서 다음 뼈아픈 지적을 받았습니다. 이 피드백을 200% 수용하여 통계 수치와 구체적 벤치마크, 명확한 논리 구조를 덧붙여 기획을 전면 개편하세요:\n{eval_feedback}\n" if eval_feedback else ""
+    
     llm = get_openai_llm()
     
     def run_research():
         prompt = ChatPromptTemplate.from_messages([
-            ("system", "당신은 최고 수준의 리서처입니다. 주어진 브리프와 웹 검색 컨텍스트를 바탕으로 타겟 소비자의 라이프스타일, 트렌드, 그리고 마이크로 트라이브(Micro-Tribe)를 3가지로 압축해 분석하세요.\n**[중요] 반드시 모든 문장과 단어를 한국어(Korean)로 상세하게 작성하세요.**"),
+            ("system", "당신은 최고 수준의 리서처입니다. 주어진 브리프와 웹 검색 컨텍스트를 바탕으로 타겟 소비자의 라이프스타일, 트렌드, 그리고 마이크로 트라이브(Micro-Tribe)를 3가지로 압축해 분석하세요.\n**[중요] 반드시 모든 문장과 단어를 한국어(Korean)로 상세하게 작성하세요.**\n{feedback_context}"),
             ("user", "브리프: {brief}\n웹 검색: {web_context}")
         ])
-        return (prompt | llm).invoke({"brief": brief, "web_context": web_context}).content
+        return (prompt | llm).invoke({"brief": brief, "web_context": web_context, "feedback_context": feedback_context}).content
 
     def run_analysis():
         prompt = ChatPromptTemplate.from_messages([
-            ("system", "당신은 예리한 전략 분석가입니다. 주어진 브리프와 웹 컨텍스트를 보고 타겟 소비자들이 겪고 있는 핵심 갈등과 컬처럴 텐션(Cultural Tension)을 3가지 도출하세요. 인과관계가 명확해야 합니다.\n**[중요] 반드시 모든 문장과 단어를 한국어(Korean)로 상세하게 작성하세요.**"),
+            ("system", "당신은 예리한 전략 분석가입니다. 주어진 브리프와 웹 컨텍스트를 보고 타겟 소비자들이 겪고 있는 핵심 갈등과 컬처럴 텐션(Cultural Tension)을 3가지 도출하세요. 인과관계가 명확해야 합니다.\n**[중요] 반드시 모든 문장과 단어를 한국어(Korean)로 상세하게 작성하세요.**\n{feedback_context}"),
             ("user", "브리프: {brief}\n웹 검색: {web_context}")
         ])
-        return (prompt | llm).invoke({"brief": brief, "web_context": web_context}).content
+        return (prompt | llm).invoke({"brief": brief, "web_context": web_context, "feedback_context": feedback_context}).content
 
     # 1. First Phase: Research & Analysis (Parallel)
     with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
@@ -660,17 +671,17 @@ def parallel_ideation_node(state: PlannerState) -> PlannerState:
     # 2. Second Phase: Ideation & Marketing (Parallel, strictly based on Phase 1 results)
     def run_idea():
         prompt = ChatPromptTemplate.from_messages([
-            ("system", "당신은 파격적인 크리에이티브 디렉터입니다. 브리프와 수집된 트렌드, 그리고 **앞서 분석된 타겟 텐션(Tension)**을 바탕으로 소비자를 유혹할 애자일 크리에이티브 가설(Agile Idea) 3가지를 도출하세요. **특히 컨텍스트 내에 '최신 디자인/마케팅 트렌드'가 있다면 아이디어에 강제로 결합시켜 매우 동시대적인 제안을 만드세요.** 반드시 앞선 전략가의 '텐션 분석'을 본질적으로 해결하는 아이디어여야 합니다.\n**[중요] 반드시 모든 문장과 단어를 한국어(Korean)로 상세하게 작성하세요.**"),
+            ("system", "당신은 파격적인 크리에이티브 디렉터입니다. 브리프와 수집된 트렌드, 그리고 **앞서 분석된 타겟 텐션(Tension)**을 바탕으로 소비자를 유혹할 애자일 크리에이티브 가설(Agile Idea) 3가지를 도출하세요. **특히 컨텍스트 내에 '최신 디자인/마케팅 트렌드'가 있다면 아이디어에 강제로 결합시켜 매우 동시대적인 제안을 만드세요.** 반드시 앞선 전략가의 '텐션 분석'을 본질적으로 해결하는 아이디어여야 합니다.\n**[중요] 반드시 모든 문장과 단어를 한국어(Korean)로 상세하게 작성하세요.**\n{feedback_context}"),
             ("user", "브리프: {brief}\n웹 검색: {web_context}\n\n전략가의 타겟/텐션 분석:\n{analysis_context}")
         ])
-        return (prompt | llm).invoke({"brief": brief, "web_context": web_context, "analysis_context": micro_tribe}).content
+        return (prompt | llm).invoke({"brief": brief, "web_context": web_context, "analysis_context": micro_tribe, "feedback_context": feedback_context}).content
         
     def run_marketing():
         prompt = ChatPromptTemplate.from_messages([
-            ("system", "당신은 퍼포먼스 마케터입니다. 브리프와 전략가의 '타겟/텐션 분석' 결과를 바탕으로, 이 타겟에게 도달하기 위한 핵심 매체 믹스, 예상 KPI(CPC/CTR), A/B 테스트 전략을 수립하세요.\n**[중요] 반드시 모든 문장과 단어를 한국어(Korean)로 상세하게 작성하세요.**"),
+            ("system", "당신은 퍼포먼스 마케터입니다. 브리프와 전략가의 '타겟/텐션 분석' 결과를 바탕으로, 이 타겟에게 도달하기 위한 핵심 매체 믹스, 예상 KPI(CPC/CTR), A/B 테스트 전략을 수립하세요.\n**[중요] 반드시 모든 문장과 단어를 한국어(Korean)로 상세하게 작성하세요.**\n{feedback_context}"),
             ("user", "브리프: {brief}\n웹 검색: {web_context}\n\n전략가의 타겟/텐션 분석:\n{analysis_context}")
         ])
-        return (prompt | llm).invoke({"brief": brief, "web_context": web_context, "analysis_context": micro_tribe}).content
+        return (prompt | llm).invoke({"brief": brief, "web_context": web_context, "analysis_context": micro_tribe, "feedback_context": feedback_context}).content
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
         f_ide = executor.submit(run_idea)

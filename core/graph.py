@@ -26,7 +26,36 @@ def build_planner_graph():
     workflow.add_edge("report_merge", "qa_judge")
     workflow.add_edge("qa_judge", "ppt_code")
     workflow.add_edge("ppt_code", "evaluation")
-    workflow.add_edge("evaluation", END)
+    
+    import re
+    def should_revise(state: PlannerState) -> str:
+        report = state.get("evaluation_report", "")
+        score = 10.0
+        match = re.search(r'종합\s*점수[^0-9]*([0-9.]+)', report)
+        if match:
+            try:
+                score = float(match.group(1))
+            except ValueError:
+                pass
+                
+        print(f"--- [ROUTER] Evaluation Score: {score} / 10 ---")
+        revision_count = state.get("revision_count", 0)
+        
+        if score < 9.0 and revision_count < 2:
+            print(f"--- [ROUTER] Score below 9.0. Triggering Revision {revision_count + 1} / 2 ---")
+            return "parallel_ideation"
+        else:
+            print("--- [ROUTER] Score acceptable or max revisions reached. Finishing. ---")
+            return END
+
+    workflow.add_conditional_edges(
+        "evaluation",
+        should_revise,
+        {
+            "parallel_ideation": "parallel_ideation",
+            END: END
+        }
+    )
     
     app = workflow.compile()
     

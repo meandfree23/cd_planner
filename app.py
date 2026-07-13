@@ -206,7 +206,6 @@ with tab1:
             
             # 상태 표시 UI
             status_text = st.empty()
-            progress_bar = st.progress(0)
             
             # 단계별 결과 출력을 위한 컬럼
             col1, col2 = st.columns(2)
@@ -239,61 +238,63 @@ with tab1:
                     "tone_and_manner": tone_and_manner,
                     "additional_context": additional_context,
                     "brief": brief_input,
-                    "designer_feedback": merged_designer_feedback
+                    "designer_feedback": merged_designer_feedback,
+                    "revision_count": 0,
+                    "evaluation_feedback": ""
                 }
                 full_state = initial_state.copy()
-                step_count = 0
-                total_steps = 13  # 노드 개수에 맞게 수정
                 
-                for output in app.stream(initial_state):
-                    for key, value in output.items():
-                        step_count += 1
-                        # progress bar 값이 1.0을 초과하지 않도록 방어 코드 추가
-                        progress_val = min(1.0, step_count / total_steps)
-                        progress_bar.progress(progress_val)
-                        full_state.update(value)
-                        
-                        if key == "parallel_ideation":
-                            status_text.info("병렬 리서치, 마이크로 트라이브 분석, 애자일 아이디어 및 마케팅 전략 도출 완료!")
-                            with research_expander:
-                                st.write("**Search Queries:**", value.get("search_queries"))
-                                st.text_area("Raw Data", value.get("research_data", "")[:1000] + "...", height=150)
-                            with analysis_expander:
-                                st.write(value.get("micro_tribe_analysis", ""))
-                            with idea_expander:
-                                st.write(value.get("agile_ideas", ""))
-                            with perf_expander:
-                                st.write(value.get("performance_data", ""))
-                        
-                        elif key == "hook_strategy":
-                            status_text.info("🧠 인간 본성(심리학)에 기반한 최적의 후킹 전략을 설계 중입니다...")
-                            with st.expander("🎣 Psychology-based Hook Strategy", expanded=True):
-                                st.success(f"**Selected Hook Strategy:** {value.get('selected_hook_strategy')}")
-                                st.info("💡 **심리학적 설계 의도 및 트리거:**")
-                                st.write(value.get("hook_reasoning"))
-                                
-                        elif key == "parallel_report":
-                            status_text.info("기획서 블루프린트 추출 완료. 병합을 준비합니다...")
+                with st.spinner("🧠 딥러닝 기반 CD 플래닝 엔진 가동 중... (심사 점수에 따라 자동 재작업이 발생할 수 있습니다)"):
+                    # recursion_limit을 늘려 루프가 끊기지 않도록 방어
+                    for output in app.stream(initial_state, {"recursion_limit": 50}):
+                        for key, value in output.items():
+                            full_state.update(value)
                             
-                        elif key == "report_merge":
-                            status_text.info("마스터 기획서 병합 완료. 심사위원의 검수가 진행중입니다...")
-                            with report_expander:
-                                st.markdown(value.get("final_report", ""))
+                            if key == "parallel_ideation":
+                                rev = value.get("revision_count", 0)
+                                if rev > 0:
+                                    status_text.warning(f"⚠️ [자가 학습 루프] 심사 점수 미달로 기획을 전면 재작성합니다! (재학습: {rev}/2회)")
+                                else:
+                                    status_text.info("병렬 리서치, 분석 및 마케팅 전략 도출 완료!")
+                                with research_expander:
+                                    st.write("**Search Queries:**", value.get("search_queries"))
+                                    st.text_area("Raw Data", value.get("research_data", "")[:1000] + "...", height=150)
+                                with analysis_expander:
+                                    st.write(value.get("micro_tribe_analysis", ""))
+                                with idea_expander:
+                                    st.write(value.get("agile_ideas", ""))
+                                with perf_expander:
+                                    st.write(value.get("performance_data", ""))
+                            
+                            elif key == "hook_strategy":
+                                status_text.info("🧠 인간 본성(심리학)에 기반한 최적의 후킹 전략을 설계 중입니다...")
+                                with st.expander("🎣 Psychology-based Hook Strategy", expanded=True):
+                                    st.success(f"**Selected Hook Strategy:** {value.get('selected_hook_strategy')}")
+                                    st.info("💡 **심리학적 설계 의도 및 트리거:**")
+                                    st.write(value.get("hook_reasoning"))
+                                    
+                            elif key == "parallel_report":
+                                status_text.info("기획서 블루프린트 추출 완료. 병합을 준비합니다...")
                                 
-                        elif key == "qa_judge":
-                            status_text.info("심사위원의 퀄리티 검수 완료. PPT 파싱 코드를 추출합니다...")
-                            with qa_expander:
-                                st.markdown(value.get("qa_feedback", ""))
-                                
-                        elif key == "ppt_code":
-                            status_text.info("PPT 파싱 코드 추출 완료. 심사위원 검수를 시작합니다...")
-                            with ppt_code_expander:
-                                st.code(value.get("ppt_code", ""), language="text")
-                                
-                        elif key == "evaluation":
-                            status_text.success("✨ 20페이지 기획서, PPT 압축 코드 및 심사 검수가 모두 완료되었습니다! (보관함 자동 저장)")
-                            with eval_expander:
-                                st.markdown(value.get("evaluation_report", ""))
+                            elif key == "report_merge":
+                                status_text.info("마스터 기획서 병합 완료. 심사위원의 검수가 진행중입니다...")
+                                with report_expander:
+                                    st.markdown(value.get("final_report", ""))
+                                    
+                            elif key == "qa_judge":
+                                status_text.info("심사위원의 퀄리티 검수 완료. PPT 파싱 코드를 추출합니다...")
+                                with qa_expander:
+                                    st.markdown(value.get("qa_feedback", ""))
+                                    
+                            elif key == "ppt_code":
+                                status_text.info("PPT 파싱 코드 추출 완료. 심사위원 검수를 시작합니다...")
+                                with ppt_code_expander:
+                                    st.code(value.get("ppt_code", ""), language="text")
+                                    
+                            elif key == "evaluation":
+                                status_text.success("✨ 20페이지 기획서, PPT 압축 코드 및 심사 검수가 모두 완료되었습니다! (보관함 자동 저장)")
+                                with eval_expander:
+                                    st.markdown(value.get("evaluation_report", ""))
                                 
                 # 리포트 파일 및 PPT 코드 자동 저장 (버그 픽스: full_state 사용)
                 if full_state and "final_report" in full_state and "ppt_code" in full_state:
