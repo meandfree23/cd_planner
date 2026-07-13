@@ -572,28 +572,28 @@ def parallel_ideation_node(state: PlannerState) -> PlannerState:
     
     def run_research():
         prompt = ChatPromptTemplate.from_messages([
-            ("system", "당신은 최고 수준의 리서처입니다. 주어진 브리프와 웹 검색 컨텍스트를 바탕으로 타겟 소비자의 라이프스타일, 트렌드, 그리고 마이크로 트라이브(Micro-Tribe)를 3가지로 압축해 분석하세요."),
+            ("system", "당신은 최고 수준의 리서처입니다. 주어진 브리프와 웹 검색 컨텍스트를 바탕으로 타겟 소비자의 라이프스타일, 트렌드, 그리고 마이크로 트라이브(Micro-Tribe)를 3가지로 압축해 분석하세요.\n**[중요] 반드시 모든 문장과 단어를 한국어(Korean)로 상세하게 작성하세요.**"),
             ("user", "브리프: {brief}\n웹 검색: {web_context}")
         ])
         return (prompt | llm).invoke({"brief": brief, "web_context": web_context}).content
 
     def run_analysis():
         prompt = ChatPromptTemplate.from_messages([
-            ("system", "당신은 예리한 전략 분석가입니다. 주어진 브리프와 웹 컨텍스트를 보고 타겟 소비자들이 겪고 있는 핵심 갈등과 컬처럴 텐션(Cultural Tension)을 3가지 도출하세요. 인과관계가 명확해야 합니다."),
+            ("system", "당신은 예리한 전략 분석가입니다. 주어진 브리프와 웹 컨텍스트를 보고 타겟 소비자들이 겪고 있는 핵심 갈등과 컬처럴 텐션(Cultural Tension)을 3가지 도출하세요. 인과관계가 명확해야 합니다.\n**[중요] 반드시 모든 문장과 단어를 한국어(Korean)로 상세하게 작성하세요.**"),
             ("user", "브리프: {brief}\n웹 검색: {web_context}")
         ])
         return (prompt | llm).invoke({"brief": brief, "web_context": web_context}).content
 
     def run_idea():
         prompt = ChatPromptTemplate.from_messages([
-            ("system", "당신은 파격적인 크리에이티브 디렉터입니다. 브리프와 수집된 웹/트렌드 컨텍스트를 바탕으로 소비자를 유혹할 애자일 크리에이티브 가설(Agile Idea) 3가지를 도출하세요. **특히 컨텍스트 내에 '최신 디자인/마케팅 북마크 ('up' 폴더) 트렌드'가 제공되었다면, 그 트렌드의 핵심 기법(예: 최신 디자인 언어, 밈 등)을 당신의 아이디어에 강제로 결합시켜 매우 동시대적이고 파격적인 제안을 만드세요.**"),
+            ("system", "당신은 파격적인 크리에이티브 디렉터입니다. 브리프와 수집된 웹/트렌드 컨텍스트를 바탕으로 소비자를 유혹할 애자일 크리에이티브 가설(Agile Idea) 3가지를 도출하세요. **특히 컨텍스트 내에 '최신 디자인/마케팅 북마크 ('up' 폴더) 트렌드'가 제공되었다면, 그 트렌드의 핵심 기법(예: 최신 디자인 언어, 밈 등)을 당신의 아이디어에 강제로 결합시켜 매우 동시대적이고 파격적인 제안을 만드세요.**\n**[중요] 반드시 모든 문장과 단어를 한국어(Korean)로 상세하게 작성하세요.**"),
             ("user", "브리프: {brief}\n웹 검색: {web_context}")
         ])
         return (prompt | llm).invoke({"brief": brief, "web_context": web_context}).content
         
     def run_marketing():
         prompt = ChatPromptTemplate.from_messages([
-            ("system", "당신은 퍼포먼스 마케터입니다. 브리프와 웹 컨텍스트를 바탕으로 타겟에게 도달하기 위한 핵심 매체 믹스, 예상 KPI(CPC/CTR), A/B 테스트 전략을 수립하세요."),
+            ("system", "당신은 퍼포먼스 마케터입니다. 브리프와 웹 컨텍스트를 바탕으로 타겟에게 도달하기 위한 핵심 매체 믹스, 예상 KPI(CPC/CTR), A/B 테스트 전략을 수립하세요.\n**[중요] 반드시 모든 문장과 단어를 한국어(Korean)로 상세하게 작성하세요.**"),
             ("user", "브리프: {brief}\n웹 검색: {web_context}")
         ])
         return (prompt | llm).invoke({"brief": brief, "web_context": web_context}).content
