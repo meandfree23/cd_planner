@@ -1,0 +1,57 @@
+[
+  {
+    "name": "Dezeen",
+    "category": "Architecture & Design",
+    "url": "https://www.dezeen.com/feed/"
+  },
+  {
+    "name": "This Is Colossal",
+    "category": "Art & Visual Culture",
+    "url": "https://thisiscolossal.com/feed"
+  },
+  {
+    "name": "Designboom",
+    "category": "Architecture & Design",
+    "url": "https://www.designboom.com/feed/"
+  },
+  {
+    "name": "Awwwards",
+    "category": "Web Design",
+    "url": "https://www.awwwards.com/blog/feed"
+  },
+  {
+    "name": "Juxtapoz Magazine",
+    "category": "Contemporary Art",
+    "url": "https://www.juxtapoz.com/news/?format=feed"
+  },
+  {
+    "name": "The Dieline",
+    "category": "Packaging Design",
+    "url": "https://thedieline.com/feed/"
+  },
+  {
+    "name": "Smashing Magazine",
+    "category": "Web Design & Development",
+    "url": "https://www.smashingmagazine.com/feed/"
+  },
+  {
+    "name": "Hi-Fructose",
+    "category": "Contemporary Art",
+    "url": "https://hifructose.com/feed/"
+  },
+  {
+    "name": "Creative Boom",
+    "category": "Art & Design",
+    "url": "https://www.creativeboom.com/feed/"
+  },
+  {
+    "name": "AIGA Eye on Design",
+    "category": "Graphic Design",
+    "url": "https://eyeondesign.aiga.org/feed/"
+  },
+  {
+    "name": "Communication Arts",
+    "category": "Visual Communications",
+    "url": "https://www.commarts.com/feed"
+  }
+]
