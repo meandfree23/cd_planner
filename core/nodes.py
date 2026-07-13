@@ -440,19 +440,42 @@ def report_merge_node(state: PlannerState) -> PlannerState:
 def qa_judge_node(state: PlannerState) -> PlannerState:
     """
     작성된 기획서(final_report)를 심사하여 개선점과 피드백을 도출하는 퀄리티 검수(QA) 에이전트.
+    브리프를 분석하여 심사위원 페르소나를 자동 선택합니다.
     """
-    print("--- [NODE] QA JUDGE (QUALITY ASSURANCE) ---")
+    print("--- [NODE] QA JUDGE (AUTO-PERSONA) ---")
     llm = get_openai_llm()
+    brief = state["brief"]
     
-    prompt = ChatPromptTemplate.from_messages([
-        ("system", """당신은 수십 년 경력의 날카롭고 냉철한 '프리젠테이션 심사위원(QA 에이전트)'입니다.
-제시된 20페이지 분량의 기획서를 꼼꼼히 평가하세요.
+    # 1. 페르소나 자동 판별
+    persona_prompt = ChatPromptTemplate.from_messages([
+        ("system", "당신은 라우팅 AI입니다. 브리프를 보고 다음 2가지 심사위원 중 하나를 선택해 번호(1 또는 2)만 대답하세요.\n1: 15년 차 보수적/논리적 시니어 심사위원 (B2B, 신뢰, 정보 전달 위주)\n2: 8년 차 트렌디/파격적 CD 심사위원 (팝업, 뷰티, 패션, F&B, MZ 타겟, 인스타그래머블)"),
+        ("user", "브리프: {brief}")
+    ])
+    persona_decision = (persona_prompt | llm).invoke({"brief": brief}).content.strip()
+    
+    if "2" in persona_decision:
+        print("[QA JUDGE] 🎧 트렌디한 8년 차 MZ CD 심사위원 출격!")
+        judge_persona = """당신은 광고 대행사의 잘 나가는 8~10년 차 트렌디 크리에이티브 디렉터(Judge)입니다.
+제출된 기획서를 검수하되, 젊은 감각과 트렌드(밈, 팝업, 숏폼, 팝컬처) 관점에서 무자비하고 날 것의 힙한 피드백을 주세요.
+
+작성 규칙:
+1. 칭찬은 아주 쿨하게 1줄로 끝내고, 아이디어가 너무 '올드'하거나 '뻔할 경우' 직설적이고 매운맛 코멘트로 지적하세요. (예: "요즘 누가 이런 걸 봅니까? 차라리 숏폼 챌린지로 비트세요.")
+2. 실질적으로 힙(Hip)함을 한 스푼 얹기 위해 "반드시 추가/수정해야 할 구체적인 트렌디 액션 아이템 3가지"를 제안하세요.
+3. 마크다운 형식으로 보기 좋게 정리해서 심사평을 작성하세요.
+"""
+    else:
+        print("[QA JUDGE] 👔 논리적인 15년 차 시니어 심사위원 출격!")
+        judge_persona = """당신은 수십 년 경력의 날카롭고 냉철한 '프리젠테이션 심사위원(QA 에이전트)'입니다.
+제출된 20페이지 분량의 기획서를 꼼꼼히 평가하세요.
 
 작성 규칙:
 1. 칭찬은 1줄로 짧게 끝내고, 기획서의 논리적 비약, 설득력 부족, 타겟 텐션과의 연결성 부족 등 '약점(Weakness)'을 날카롭게 지적하세요.
 2. 실질적으로 기획의 퀄리티를 높이기 위해 "작성자가 반드시 수정/보완해야 할 구체적인 액션 아이템 3가지"를 강력히 요구하세요.
 3. 마크다운 형식으로 보기 좋게 정리해서 심사평을 작성하세요.
-"""),
+"""
+
+    prompt = ChatPromptTemplate.from_messages([
+        ("system", judge_persona),
         ("user", "기획서 원문:\n{final_report}")
     ])
     
@@ -565,7 +588,7 @@ def evaluation_node(state: PlannerState) -> PlannerState:
 # =====================================================================
 
 def parallel_ideation_node(state: PlannerState) -> PlannerState:
-    print("--- [NODE] PARALLEL IDEATION (Research, Analysis, Idea, Marketing) ---")
+    print("--- [NODE] HYBRID IDEATION (Research/Analysis -> Idea/Marketing) ---")
     brief = state["brief"]
     web_context = state.get("web_context", "")
     llm = get_openai_llm()
@@ -584,28 +607,31 @@ def parallel_ideation_node(state: PlannerState) -> PlannerState:
         ])
         return (prompt | llm).invoke({"brief": brief, "web_context": web_context}).content
 
+    # 1. First Phase: Research & Analysis (Parallel)
+    with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+        f_res = executor.submit(run_research)
+        f_ana = executor.submit(run_analysis)
+        research_data = f_res.result()
+        micro_tribe = f_ana.result()
+
+    # 2. Second Phase: Ideation & Marketing (Parallel, strictly based on Phase 1 results)
     def run_idea():
         prompt = ChatPromptTemplate.from_messages([
-            ("system", "당신은 파격적인 크리에이티브 디렉터입니다. 브리프와 수집된 웹/트렌드 컨텍스트를 바탕으로 소비자를 유혹할 애자일 크리에이티브 가설(Agile Idea) 3가지를 도출하세요. **특히 컨텍스트 내에 '최신 디자인/마케팅 북마크 ('up' 폴더) 트렌드'가 제공되었다면, 그 트렌드의 핵심 기법(예: 최신 디자인 언어, 밈 등)을 당신의 아이디어에 강제로 결합시켜 매우 동시대적이고 파격적인 제안을 만드세요.**\n**[중요] 반드시 모든 문장과 단어를 한국어(Korean)로 상세하게 작성하세요.**"),
-            ("user", "브리프: {brief}\n웹 검색: {web_context}")
+            ("system", "당신은 파격적인 크리에이티브 디렉터입니다. 브리프와 수집된 트렌드, 그리고 **앞서 분석된 타겟 텐션(Tension)**을 바탕으로 소비자를 유혹할 애자일 크리에이티브 가설(Agile Idea) 3가지를 도출하세요. **특히 컨텍스트 내에 '최신 디자인/마케팅 트렌드'가 있다면 아이디어에 강제로 결합시켜 매우 동시대적인 제안을 만드세요.** 반드시 앞선 전략가의 '텐션 분석'을 본질적으로 해결하는 아이디어여야 합니다.\n**[중요] 반드시 모든 문장과 단어를 한국어(Korean)로 상세하게 작성하세요.**"),
+            ("user", "브리프: {brief}\n웹 검색: {web_context}\n\n전략가의 타겟/텐션 분석:\n{analysis_context}")
         ])
-        return (prompt | llm).invoke({"brief": brief, "web_context": web_context}).content
+        return (prompt | llm).invoke({"brief": brief, "web_context": web_context, "analysis_context": micro_tribe}).content
         
     def run_marketing():
         prompt = ChatPromptTemplate.from_messages([
-            ("system", "당신은 퍼포먼스 마케터입니다. 브리프와 웹 컨텍스트를 바탕으로 타겟에게 도달하기 위한 핵심 매체 믹스, 예상 KPI(CPC/CTR), A/B 테스트 전략을 수립하세요.\n**[중요] 반드시 모든 문장과 단어를 한국어(Korean)로 상세하게 작성하세요.**"),
-            ("user", "브리프: {brief}\n웹 검색: {web_context}")
+            ("system", "당신은 퍼포먼스 마케터입니다. 브리프와 전략가의 '타겟/텐션 분석' 결과를 바탕으로, 이 타겟에게 도달하기 위한 핵심 매체 믹스, 예상 KPI(CPC/CTR), A/B 테스트 전략을 수립하세요.\n**[중요] 반드시 모든 문장과 단어를 한국어(Korean)로 상세하게 작성하세요.**"),
+            ("user", "브리프: {brief}\n웹 검색: {web_context}\n\n전략가의 타겟/텐션 분석:\n{analysis_context}")
         ])
-        return (prompt | llm).invoke({"brief": brief, "web_context": web_context}).content
+        return (prompt | llm).invoke({"brief": brief, "web_context": web_context, "analysis_context": micro_tribe}).content
 
-    with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
-        f_res = executor.submit(run_research)
-        f_ana = executor.submit(run_analysis)
+    with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
         f_ide = executor.submit(run_idea)
         f_mar = executor.submit(run_marketing)
-        
-        research_data = f_res.result()
-        micro_tribe = f_ana.result()
         agile_ideas = f_ide.result()
         perf_data = f_mar.result()
 
