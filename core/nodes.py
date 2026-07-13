@@ -301,6 +301,9 @@ def report_sec1_node(state: PlannerState) -> PlannerState:
 3. [분석의 절대 원칙]: 절대 '추가 정보가 필요하다'며 작성을 포기하거나 거절하지 마세요. 데이터가 부족하더라도 수집된 최소한의 팩트들을 엮어, 명확한 인과관계(Reason Why)가 증명된 논리적 추론으로 내용을 당당하게 100% 완성하세요.
 
 지금은 **[Part 1: 현상 분석 및 원인 규명 - HOOK & ATTENTION]** 파트입니다.
+특히 도입부(Slide 1~3)는 다음의 심리학적 훅(Hook) 전략을 철저히 반영하여 카피와 논리를 강렬하게 각색하세요:
+- 선택된 훅 전략: {hook_strategy}
+- 훅 설계 의도: {hook_reasoning}
 
 작성 규칙:
 1. 타겟 분석과 기획의 논리적 뼈대가 부족하지 않도록, 이 파트에서만 **반드시 10장~12장 분량**으로 매우 밀도 있게 슬라이드를 확장해서 작성하세요. 다음 핵심 내용들이 충분히 세분화되어 슬라이드(## Slide X)로 전개되어야 합니다:
@@ -327,6 +330,8 @@ def report_sec1_node(state: PlannerState) -> PlannerState:
         heidi_notes=heidi_notes,
         feedback_context=feedback_context,
         brief=state["brief"],
+        hook_strategy=state.get("selected_hook_strategy", "기본 훅 전략"),
+        hook_reasoning=state.get("hook_reasoning", ""),
         research_data=state.get("research_data", ""),
         performance_data=state.get("performance_data", "")
     ))
@@ -798,39 +803,19 @@ def hook_strategy_node(state: PlannerState) -> PlannerState:
     return {"selected_hook_strategy": selected, "hook_reasoning": reasoning}
 
 def parallel_report_node(state: PlannerState) -> PlannerState:
-    print("--- [NODE] PARALLEL REPORT GENERATION (Sec1, Sec2, Sec3) ---")
-    blueprint = state.get("blueprint", "")
-    hook_strategy = state.get("selected_hook_strategy", "기본 훅 전략")
-    hook_reasoning = state.get("hook_reasoning", "")
-    llm = get_openai_llm()
+    print("--- [NODE] PARALLEL REPORT GENERATION (Sec1, Sec2, Sec3, Appendix) ---")
     
     def run_sec1():
-        prompt = ChatPromptTemplate.from_messages([
-            ("system", f"당신은 기획서 도입부를 매혹적으로 짜는 전문가입니다. 전체 블루프린트 중에서 '1. 리서치 데이터'와 '2. 타겟 및 텐션 분석'을 바탕으로 **'{{hook_strategy}}'** 전략을 철저히 반영하여 도입부(Hook) 텍스트를 마크다운으로 재구성하세요.\n\n[심리학적 설계 지침]\n이 전략의 선택 이유는 다음과 같습니다: **{{hook_reasoning}}**\n이 심리적 트리거(예: 손실 회피, 희귀성 등)가 청중의 무의식을 강타하도록 텍스트의 논리와 카피를 가장 날카롭고 강렬하게 각색하세요. 블루프린트의 팩트를 활용하되 긴장감을 극대화하세요."),
-            ("user", "블루프린트: {blueprint}")
-        ])
-        return (prompt | llm).invoke({"hook_strategy": hook_strategy, "hook_reasoning": hook_reasoning, "blueprint": blueprint}).content
+        return report_sec1_node(state)["report_sec1"]
 
     def run_sec2():
-        prompt = ChatPromptTemplate.from_messages([
-            ("system", "당신은 기획서 작성 전문가입니다. 전체 블루프린트 중에서 **'3. 애자일 크리에이티브 가설 (Ideas)'에 해당하는 내용만을 정확히 추출**하세요. 단, 추출한 해당 파트의 텍스트는 **단 한 글자도 요약하거나 생략하지 말고 100% 보존**하여 마크다운 포맷으로 정리해야 합니다. 리서치나 마케팅 파트의 내용은 절대 가져오지 마세요."),
-            ("user", "블루프린트: {blueprint}")
-        ])
-        return (prompt | llm).invoke({"blueprint": blueprint}).content
+        return report_sec2_node(state)["report_sec2"]
 
     def run_sec3():
-        prompt = ChatPromptTemplate.from_messages([
-            ("system", "당신은 기획서 작성 전문가입니다. 전체 블루프린트 중에서 **'5. 예술적 레퍼런스 및 승화 전략 (Artistic Layer)'에 해당하는 내용만을 정확히 추출**하세요. 단, 추출한 해당 파트의 텍스트는 **단 한 글자도 요약하거나 생략하지 말고 100% 보존**하여 마크다운 포맷으로 정리해야 합니다. 마케팅이나 다른 파트의 내용은 절대 가져오지 마세요."),
-            ("user", "블루프린트: {blueprint}")
-        ])
-        return (prompt | llm).invoke({"blueprint": blueprint}).content
+        return report_sec3_node(state)["report_sec3"]
 
     def run_appendix():
-        prompt = ChatPromptTemplate.from_messages([
-            ("system", "당신은 기획서 작성 전문가입니다. 전체 블루프린트 중에서 **'4. 퍼포먼스 마케팅 및 매체 전략 (Marketing)'에 해당하는 내용만을 정확히 추출하여 마크다운 포맷으로 정리하세요.** (이 내용은 나중에 별첨 슬라이드로 변환됩니다.)"),
-            ("user", "블루프린트: {blueprint}")
-        ])
-        return (prompt | llm).invoke({"blueprint": blueprint}).content
+        return report_appendix_node(state)["report_appendix"]
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
         f1 = executor.submit(run_sec1)
