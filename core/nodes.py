@@ -74,6 +74,10 @@ def get_openai_llm():
     # Rate Limit (429) 에러 방지를 위해 자동 재시도 횟수 대폭 증가
     return ChatOpenAI(model="gpt-4o", temperature=0.3, max_retries=15)
 
+def get_mini_llm():
+    # 텍스트 생성량이 방대하여 TPM 한도(30,000)를 초과하는 병렬 리포트 생성 노드를 위한 빠르고 가벼운 모델
+    return ChatOpenAI(model="gpt-4o-mini", temperature=0.3, max_retries=15)
+
 def brand_asset_extractor_node(state: PlannerState) -> PlannerState:
     print("--- [NODE] BRAND DEEP DIVE & SNS PERCEPTION ---")
     url = state.get("brand_url", "").strip()
@@ -351,7 +355,7 @@ def performance_marketing_node(state: PlannerState) -> PlannerState:
 
 def report_sec1_node(state: PlannerState) -> PlannerState:
     print("--- [NODE] REPORT SEC 1: 환경 분석 및 통계 ---")
-    llm = get_openai_llm()
+    llm = get_mini_llm()
     heidi_notes = get_heidi_design_notes()
     
     brand_assets = state.get("brand_assets", "")
@@ -408,7 +412,7 @@ def report_sec1_node(state: PlannerState) -> PlannerState:
 
 def report_sec2_node(state: PlannerState) -> PlannerState:
     print("--- [NODE] REPORT SEC 2: 타겟 분석 및 전략 ---")
-    llm = get_openai_llm()
+    llm = get_mini_llm()
     heidi_notes = get_heidi_design_notes()
     
     brand_assets = state.get("brand_assets", "")
@@ -457,7 +461,7 @@ def report_sec2_node(state: PlannerState) -> PlannerState:
 
 def report_sec3_node(state: PlannerState) -> PlannerState:
     print("--- [NODE] REPORT SEC 3: 실행 계획 및 예산 ---")
-    llm = get_openai_llm()
+    llm = get_mini_llm()
     heidi_notes = get_heidi_design_notes()
     
     brand_assets = state.get("brand_assets", "")
@@ -501,7 +505,7 @@ def report_sec3_node(state: PlannerState) -> PlannerState:
 
 def report_appendix_node(state: PlannerState) -> PlannerState:
     print("--- [NODE] REPORT APPENDIX: 퍼포먼스 마케팅 별첨 ---")
-    llm = get_openai_llm()
+    llm = get_mini_llm()
     heidi_notes = get_heidi_design_notes()
     
     brand_assets = state.get("brand_assets", "")
