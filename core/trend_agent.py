@@ -13,19 +13,23 @@ def fetch_daily_trend_report() -> str:
     search_tool = TavilySearchResults(max_results=5)
     
     import random
-    marketing_flavors = ["fashion", "food and beverage", "technology", "sustainability", "guerilla", "viral", "interactive", "sports", "beauty", "automotive"]
+    # A24 특유의 유니크함/언더독 감성과 메이저 광고제의 권위를 믹스
+    marketing_awards = ["Cannes Lions", "Clio Awards", "New York Festivals", "D&AD", "Webby Awards"]
+    marketing_vibes = ["A24 style cinematic", "highly unique", "subversive and provocative", "indie aesthetic", "boundary pushing"]
+    m_award = random.choice(marketing_awards)
+    m_vibe = random.choice(marketing_vibes)
+    
     art_flavors = ["digital media art", "large scale sculpture", "performance art", "kinetic art", "light installation", "immersive exhibition"]
-    m_flavor = random.choice(marketing_flavors)
     a_flavor = random.choice(art_flavors)
     
     # 1. 매번 다르고 신선한 정보를 수집하기 위해 검색어에 랜덤 테마 부여
-    marketing_query = f"latest highly creative {m_flavor} brand marketing campaign case study 2024"
+    marketing_query = f"latest {m_award} winning {m_vibe} brand marketing campaign case study 2024"
     art_query = f"latest {a_flavor} contemporary art exhibition installation 2024"
     
     marketing_results = search_tool.invoke({"query": marketing_query})
     art_results = search_tool.invoke({"query": art_query})
     
-    search_context = f"=== Marketing Search Results ({m_flavor}) ===\n{marketing_results}\n\n=== Art Search Results ({a_flavor}) ===\n{art_results}"
+    search_context = f"=== Marketing Search Results ({m_award}, {m_vibe}) ===\n{marketing_results}\n\n=== Art Search Results ({a_flavor}) ===\n{art_results}"
     
     # 2. LLM 분석 프롬프트
     prompt = ChatPromptTemplate.from_messages([
