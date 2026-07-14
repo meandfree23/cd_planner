@@ -12,14 +12,20 @@ def fetch_daily_trend_report() -> str:
     llm = ChatOpenAI(model="gpt-4o", temperature=0.7, max_retries=15)
     search_tool = TavilySearchResults(max_results=5)
     
-    # 1. 최신 정보 수집 (Marketing & Art)
-    marketing_query = "latest creative global marketing campaigns case study 2024"
-    art_query = "latest contemporary art interactive installations exhibitions 2024"
+    import random
+    marketing_flavors = ["fashion", "food and beverage", "technology", "sustainability", "guerilla", "viral", "interactive", "sports", "beauty", "automotive"]
+    art_flavors = ["digital media art", "large scale sculpture", "performance art", "kinetic art", "light installation", "immersive exhibition"]
+    m_flavor = random.choice(marketing_flavors)
+    a_flavor = random.choice(art_flavors)
+    
+    # 1. 매번 다르고 신선한 정보를 수집하기 위해 검색어에 랜덤 테마 부여
+    marketing_query = f"latest highly creative {m_flavor} brand marketing campaign case study 2024"
+    art_query = f"latest {a_flavor} contemporary art exhibition installation 2024"
     
     marketing_results = search_tool.invoke({"query": marketing_query})
     art_results = search_tool.invoke({"query": art_query})
     
-    search_context = f"=== Marketing Search Results ===\n{marketing_results}\n\n=== Art Search Results ===\n{art_results}"
+    search_context = f"=== Marketing Search Results ({m_flavor}) ===\n{marketing_results}\n\n=== Art Search Results ({a_flavor}) ===\n{art_results}"
     
     # 2. LLM 분석 프롬프트
     prompt = ChatPromptTemplate.from_messages([
