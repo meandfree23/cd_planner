@@ -139,7 +139,7 @@ def show_html_preview(html_content):
     st.components.v1.html(html_content, height=800, scrolling=True)
 
 # 메인 UI
-tab1, tab2 = st.tabs(["🚀 기획안 생성기", "📁 기획서 보관함 (스크랩)"])
+tab1, tab2, tab3 = st.tabs(["🚀 기획안 생성기", "📁 기획서 보관함 (스크랩)", "📰 일일 트렌드 & 아트 인사이트"])
 
 with tab1:
     st.markdown("### 🎯 캠페인 브리프 세팅 (Structured Form)")
@@ -550,3 +550,53 @@ with tab2:
                             if st.button("👁️ 모달창에서 즉시 띄워보기", key=f"view_html_{rf}"):
                                 show_html_preview(html_data)
                             st.download_button(label="📥 실제 HTML 다운로드", data=html_data, file_name=html_rf, mime="text/html", key=f"dl_html_btn_{rf}")
+
+with tab3:
+    st.markdown("### 📰 일일 트렌드 & 아트 인사이트")
+    st.markdown("전 세계의 신선한 마케팅과 현대 예술 사례를 매일 하나씩 스캔하여 실무 적용 가능한 인사이트를 추출합니다.")
+    
+    col_t1, col_t2 = st.columns([1, 3])
+    
+    import core.trend_agent
+    from core.trend_agent import get_all_trend_dates, load_trend_report, fetch_daily_trend_report
+    
+    dates = get_all_trend_dates()
+    
+    with col_t1:
+        st.markdown("#### 📅 리포트 보관함")
+        selected_date = None
+        if dates:
+            selected_date = st.radio("날짜 선택", dates, index=0)
+        else:
+            st.write("아직 저장된 트렌드 리포트가 없습니다.")
+            
+        st.write("---")
+        if st.button("🔥 오늘의 인사이트 발굴하기", type="primary"):
+            try:
+                env_openai = st.secrets.get("OPENAI_API_KEY", os.getenv("OPENAI_API_KEY", ""))
+                if env_openai: os.environ["OPENAI_API_KEY"] = env_openai
+                env_tavily = st.secrets.get("TAVILY_API_KEY", os.getenv("TAVILY_API_KEY", ""))
+                if env_tavily: os.environ["TAVILY_API_KEY"] = env_tavily
+            except:
+                pass
+                
+            if not os.getenv("OPENAI_API_KEY"):
+                st.error("OpenAI API Key가 설정되지 않았습니다.")
+            elif not os.getenv("TAVILY_API_KEY"):
+                st.error("Tavily API Key가 설정되지 않았습니다.")
+            else:
+                with st.spinner("🌍 전 세계 마케팅 & 예술 트렌드를 스캔 중입니다... (약 15초 소요)"):
+                    try:
+                        new_report = fetch_daily_trend_report()
+                        st.success("오늘의 무앗딥 인사이트 발굴 완료!")
+                        st.rerun()
+                    except Exception as e:
+                        st.error(f"오류가 발생했습니다: {str(e)}")
+                        
+    with col_t2:
+        if selected_date:
+            report_content = load_trend_report(selected_date)
+            if report_content:
+                st.markdown(report_content)
+        else:
+            st.info("좌측에서 [오늘의 인사이트 발굴하기] 버튼을 눌러 첫 번째 트렌드를 찾아보세요.")
