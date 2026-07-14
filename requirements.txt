@@ -16,3 +16,4 @@ youtube-transcript-api
 yt-dlp
 pandas
 tavily-python
+langchain-community
