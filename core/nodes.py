@@ -354,6 +354,10 @@ def report_sec1_node(state: PlannerState) -> PlannerState:
     llm = get_openai_llm()
     heidi_notes = get_heidi_design_notes()
     
+    brand_assets = state.get("brand_assets", "")
+    blueprint = state.get("blueprint", "")
+    brand_context = f"\n[🏢 기업 자산 및 기획의 핵심 전략 명제(Blueprint)]\n이 기획서는 뜬구름 잡는 일반론이 되어서는 안 됩니다. 아래의 기업 고유 자산과 CSO의 전략 명제를 반드시 뼈대로 삼아 작성하세요:\n{brand_assets}\n{blueprint}\n" if (brand_assets or blueprint) else ""
+    
     prompt = ChatPromptTemplate.from_messages([
         ("system", """당신은 총 30페이지 분량의 [심층 결과 분석 보고서] 중 전반부(약 10~12장)를 작성하는 최고 수준의 비즈니스 및 전략 컨설턴트입니다.
 
@@ -382,7 +386,8 @@ def report_sec1_node(state: PlannerState) -> PlannerState:
 4. 최소 2개 이상의 슬라이드에는 현상을 직관적으로 증명하는 `mermaid` 차트 코드를 삽입하세요.
 
 {heidi_notes}
-{feedback_context}"""),
+{feedback_context}
+{brand_context}"""),
         ("user", "브리프: {brief}\n\n분석 기반 데이터:\n{research_data}\n{performance_data}")
     ])
     
@@ -391,6 +396,7 @@ def report_sec1_node(state: PlannerState) -> PlannerState:
     response = llm.invoke(prompt.format_messages(
         heidi_notes=heidi_notes,
         feedback_context=feedback_context,
+        brand_context=brand_context,
         brief=state["brief"],
         hook_strategy=state.get("selected_hook_strategy", "기본 훅 전략"),
         hook_reasoning=state.get("hook_reasoning", ""),
@@ -404,6 +410,10 @@ def report_sec2_node(state: PlannerState) -> PlannerState:
     print("--- [NODE] REPORT SEC 2: 타겟 분석 및 전략 ---")
     llm = get_openai_llm()
     heidi_notes = get_heidi_design_notes()
+    
+    brand_assets = state.get("brand_assets", "")
+    blueprint = state.get("blueprint", "")
+    brand_context = f"\n[🏢 기업 자산 및 기획의 핵심 전략 명제(Blueprint)]\n이 기획서는 뜬구름 잡는 일반론이 되어서는 안 됩니다. 아래의 기업 고유 자산과 CSO의 전략 명제를 반드시 뼈대로 삼아 작성하세요:\n{brand_assets}\n{blueprint}\n" if (brand_assets or blueprint) else ""
     
     prompt = ChatPromptTemplate.from_messages([
         ("system", """당신은 총 30페이지 분량의 [심층 결과 분석 보고서] 중 중반부(약 10~12장)를 작성하는 최고 수준의 타겟 전략 분석가이자 크리에이티브 디렉터입니다.
@@ -429,12 +439,14 @@ def report_sec2_node(state: PlannerState) -> PlannerState:
 3. 대상 타겟층(마이크로 트라이브)의 기저에 깔린 사회적/문화적 텐션(Tension)이나 미충족 요구(Unmet Needs)를 깊이 해부하고, 이것이 왜 발생하는지 비즈니스적/구조적 인과 관계를 증명하세요.
 4. 타겟의 행동 여정이나 상호작용의 흐름을 시각화하는 `mermaid` 흐름도(graph TD) 코드를 최소 2개 삽입하세요.
 
-{heidi_notes}"""),
+{heidi_notes}
+{brand_context}"""),
         ("user", "브리프: {brief}\n\n트라이브 및 텐션 데이터:\n{micro_tribe_analysis}\n{cultural_tensions}\n\n추가 데이터:\n{performance_data}")
     ])
     
     response = llm.invoke(prompt.format_messages(
         heidi_notes=heidi_notes,
+        brand_context=brand_context,
         brief=state["brief"],
         micro_tribe_analysis=state.get("micro_tribe_analysis", ""),
         cultural_tensions=state.get("cultural_tensions", ""),
@@ -447,6 +459,10 @@ def report_sec3_node(state: PlannerState) -> PlannerState:
     print("--- [NODE] REPORT SEC 3: 실행 계획 및 예산 ---")
     llm = get_openai_llm()
     heidi_notes = get_heidi_design_notes()
+    
+    brand_assets = state.get("brand_assets", "")
+    blueprint = state.get("blueprint", "")
+    brand_context = f"\n[🏢 기업 자산 및 기획의 핵심 전략 명제(Blueprint)]\n이 기획서는 뜬구름 잡는 일반론이 되어서는 안 됩니다. 아래의 기업 고유 자산과 CSO의 전략 명제를 반드시 뼈대로 삼아 작성하세요:\n{brand_assets}\n{blueprint}\n" if (brand_assets or blueprint) else ""
     
     prompt = ChatPromptTemplate.from_messages([
         ("system", """당신은 총 30페이지 분량의 기획서 중 가장 후반부(25~30페이지 구간)를 장식하는 하이엔드 아트 디렉터입니다.
@@ -469,12 +485,14 @@ def report_sec3_node(state: PlannerState) -> PlannerState:
 3. 각 슬라이드의 [PT 스크립트]는 통계적 수치와 예술적 미학을 바탕으로 한, 가장 밀도 높고 통찰력 있는 장문의 논술(최소 300자 이상)이어야 합니다.
 4. 미래 발전 마일스톤이나 예술적 상호작용 프로세스를 보여주는 `mermaid` 차트를 최소 2개 삽입하세요.
 
-{heidi_notes}"""),
+{heidi_notes}
+{brand_context}"""),
         ("user", "브리프: {brief}\n\n기초 아이디어 가설 및 비전:\n{agile_ideas}\n\n예술적 레퍼런스(Artistic Layer):\n{artistic_references}")
     ])
     
     response = llm.invoke(prompt.format_messages(
         heidi_notes=heidi_notes,
+        brand_context=brand_context,
         brief=state["brief"],
         agile_ideas=state.get("agile_ideas", ""),
         artistic_references=state.get("artistic_references", "")
@@ -485,6 +503,10 @@ def report_appendix_node(state: PlannerState) -> PlannerState:
     print("--- [NODE] REPORT APPENDIX: 퍼포먼스 마케팅 별첨 ---")
     llm = get_openai_llm()
     heidi_notes = get_heidi_design_notes()
+    
+    brand_assets = state.get("brand_assets", "")
+    blueprint = state.get("blueprint", "")
+    brand_context = f"\n[🏢 기업 자산 및 기획의 핵심 전략 명제(Blueprint)]\n이 기획서는 뜬구름 잡는 일반론이 되어서는 안 됩니다. 아래의 기업 고유 자산과 CSO의 전략 명제를 반드시 뼈대로 삼아 작성하세요:\n{brand_assets}\n{blueprint}\n" if (brand_assets or blueprint) else ""
     
     prompt = ChatPromptTemplate.from_messages([
         ("system", """당신은 [심층 결과 분석 보고서]의 마지막을 장식하는 최고 수준의 퍼포먼스 마케팅 디렉터입니다.
@@ -501,12 +523,14 @@ def report_appendix_node(state: PlannerState) -> PlannerState:
    - RFP 대응, 예산 효율성, A/B 테스트 운영 계획
 4. 각 슬라이드의 [PT 스크립트]는 실무적이고 구체적인 숫자를 바탕으로 최소 300자 이상 작성하세요.
 
-{heidi_notes}"""),
+{heidi_notes}
+{brand_context}"""),
         ("user", "브리프: {brief}\n\n퍼포먼스 마케팅 전략 데이터:\n{performance_data}")
     ])
     
     response = llm.invoke(prompt.format_messages(
         heidi_notes=heidi_notes,
+        brand_context=brand_context,
         brief=state["brief"],
         performance_data=state.get("performance_data", "")
     ))
