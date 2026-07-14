@@ -9,7 +9,7 @@ def fetch_daily_trend_report() -> str:
     Tavily를 통해 최신 글로벌 마케팅/예술 트렌드를 스캔하고, 
     LLM을 통해 [현상-본질-적용] 형태의 마크다운 리포트를 생성합니다.
     """
-    llm = ChatOpenAI(model="gpt-4o", temperature=0.7)
+    llm = ChatOpenAI(model="gpt-4o", temperature=0.7, max_retries=15)
     search_tool = TavilySearchResults(max_results=5)
     
     # 1. 최신 정보 수집 (Marketing & Art)

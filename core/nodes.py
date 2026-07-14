@@ -71,7 +71,8 @@ def get_gemini_llm():
 
 def get_openai_llm():
     # 고품질 기획서 생성을 위해 메인 LLM을 GPT-4o 플래그십 모델로 롤백
-    return ChatOpenAI(model="gpt-4o", temperature=0.3)
+    # Rate Limit (429) 에러 방지를 위해 자동 재시도 횟수 대폭 증가
+    return ChatOpenAI(model="gpt-4o", temperature=0.3, max_retries=15)
 
 def web_search_node(state: PlannerState) -> PlannerState:
     print("--- [NODE] WEB SEARCH (DUCKDUCKGO) ---")
