@@ -567,11 +567,11 @@ with tab3:
     
     import time
     import core.trend_agent
-    from core.trend_agent import get_all_trend_info, load_trend_report, fetch_daily_trend_report
+    from core.trend_agent import get_all_trend_info, load_trend_report, fetch_daily_trend_report, delete_trend_report
     
     trend_data = get_all_trend_info()
     today_str = time.strftime('%Y-%m-%d')
-    today_exists = any(t["date"] == today_str for t in trend_data)
+    today_exists = any(t["date_str"] == today_str for t in trend_data)
     
     # 자동 발굴 로직 (오늘 날짜가 없으면 즉시 실행)
     if not today_exists:
@@ -591,18 +591,26 @@ with tab3:
     # 데이터 리로드
     trend_data = get_all_trend_info()
     display_options = [t["display"] for t in trend_data]
-    display_to_date = {t["display"]: t["date"] for t in trend_data}
+    display_to_id = {t["display"]: t["file_id"] for t in trend_data}
     
     with col_t1:
         st.markdown("#### 📅 리포트 보관함")
         selected_display = None
         if display_options:
             selected_display = st.radio("트렌드 리스트", display_options, index=0)
+            
+            # 개별 삭제 기능
+            st.write("") # 여백
+            if st.button("🗑️ 선택된 리포트 삭제", use_container_width=True):
+                selected_file_id = display_to_id[selected_display]
+                delete_trend_report(selected_file_id)
+                st.success("삭제되었습니다!")
+                st.rerun()
         else:
             st.write("아직 저장된 트렌드 리포트가 없습니다.")
             
         st.write("---")
-        if st.button("🔥 트렌드 수동 재발굴하기", type="primary"):
+        if st.button("🔥 트렌드 수동 재발굴하기", type="primary", use_container_width=True):
             try:
                 env_openai = st.secrets.get("OPENAI_API_KEY", os.getenv("OPENAI_API_KEY", ""))
                 if env_openai: os.environ["OPENAI_API_KEY"] = env_openai
@@ -626,8 +634,8 @@ with tab3:
                         
     with col_t2:
         if selected_display:
-            selected_date = display_to_date[selected_display]
-            report_content = load_trend_report(selected_date)
+            selected_file_id = display_to_id[selected_display]
+            report_content = load_trend_report(selected_file_id)
             if report_content:
                 st.markdown(report_content)
         else:

@@ -27,7 +27,7 @@ def fetch_daily_trend_report() -> str:
 주어진 최신 글로벌 검색 결과를 바탕으로, 가장 파괴적이고 영감을 주는 **마케팅 사례 1개**와 **예술 사례 1개**를 엄선하여 분석 리포트를 작성하세요.
 
 [분석 및 출력 가이드 (마크다운 포맷)]
-# 📰 [마케팅 캠페인명] 두 사례를 관통하는 핵심 인사이트 한 줄 요약
+# 📰 [브랜드명] 15자 이내의 아주 간결한 인사이트 요약
 
 오늘의 발굴 날짜: {date}
 
@@ -52,33 +52,45 @@ def fetch_daily_trend_report() -> str:
     response = llm.invoke(prompt.format_messages(date=today_str, search_context=search_context))
     report_content = response.content
     
-    # 3. 폴더 및 파일 저장
+    # 3. 폴더 및 파일 저장 (누락 없이 누적하기 위해 타임스탬프 추가)
     if not os.path.exists("trends"):
         os.makedirs("trends")
         
-    filename = f"trends/{time.strftime('%Y-%m-%d')}.md"
+    file_id = time.strftime('%Y-%m-%d_%H%M%S')
+    filename = f"trends/{file_id}.md"
     with open(filename, "w", encoding="utf-8") as f:
         f.write(report_content)
         
     return report_content
 
-def load_trend_report(date_str: str) -> str:
-    """특정 날짜의 리포트를 로드합니다. YYYY-MM-DD 형식"""
-    filepath = f"trends/{date_str}.md"
+def load_trend_report(file_id: str) -> str:
+    """특정 파일 ID의 리포트를 로드합니다."""
+    filepath = f"trends/{file_id}.md"
     if os.path.exists(filepath):
         with open(filepath, "r", encoding="utf-8") as f:
             return f.read()
     return None
 
+def delete_trend_report(file_id: str) -> bool:
+    """특정 파일 ID의 리포트를 삭제합니다."""
+    filepath = f"trends/{file_id}.md"
+    if os.path.exists(filepath):
+        os.remove(filepath)
+        return True
+    return False
+
 def get_all_trend_info() -> list:
-    """저장된 모든 트렌드 리포트의 날짜와 제목 목록을 반환합니다."""
+    """저장된 모든 트렌드 리포트의 ID와 제목 목록을 반환합니다."""
     if not os.path.exists("trends"):
         return []
     files = [f for f in os.listdir("trends") if f.endswith(".md")]
     
     results = []
     for f in files:
-        date_str = f.replace(".md", "")
+        file_id = f.replace(".md", "")
+        # 파일명에서 날짜 추출 (예: 2024-07-14_123456 -> 2024-07-14)
+        date_str = file_id.split("_")[0] if "_" in file_id else file_id
+        
         filepath = os.path.join("trends", f)
         title = "제목 없음"
         with open(filepath, "r", encoding="utf-8") as file:
@@ -89,8 +101,14 @@ def get_all_trend_info() -> list:
                 elif line.startswith("# "):
                     title = line.replace("# ", "").strip()
                     break
-        results.append({"date": date_str, "display": f"{date_str}: {title}"})
+        
+        # UI에 노출될 간결한 문자열
+        display_str = f"{date_str}: {title}"
+        if len(display_str) > 40:
+            display_str = display_str[:37] + "..."
+            
+        results.append({"file_id": file_id, "date_str": date_str, "display": display_str})
     
-    # 최신순 정렬
-    results = sorted(results, key=lambda x: x["date"], reverse=True)
+    # 최신순 정렬 (file_id에 시간이 포함되어 있으므로 file_id 역순 정렬이 최신순임)
+    results = sorted(results, key=lambda x: x["file_id"], reverse=True)
     return results
