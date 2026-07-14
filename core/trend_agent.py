@@ -27,7 +27,7 @@ def fetch_daily_trend_report() -> str:
 주어진 최신 글로벌 검색 결과를 바탕으로, 가장 파괴적이고 영감을 주는 **마케팅 사례 1개**와 **예술 사례 1개**를 엄선하여 분석 리포트를 작성하세요.
 
 [분석 및 출력 가이드 (마크다운 포맷)]
-# 📰 오늘의 트렌드 & 아트 인사이트
+# 📰 [마케팅 캠페인명] 두 사례를 관통하는 핵심 인사이트 한 줄 요약
 
 오늘의 발굴 날짜: {date}
 
@@ -70,10 +70,27 @@ def load_trend_report(date_str: str) -> str:
             return f.read()
     return None
 
-def get_all_trend_dates() -> list:
-    """저장된 모든 트렌드 리포트의 날짜 목록을 반환합니다."""
+def get_all_trend_info() -> list:
+    """저장된 모든 트렌드 리포트의 날짜와 제목 목록을 반환합니다."""
     if not os.path.exists("trends"):
         return []
     files = [f for f in os.listdir("trends") if f.endswith(".md")]
-    dates = sorted([f.replace(".md", "") for f in files], reverse=True)
-    return dates
+    
+    results = []
+    for f in files:
+        date_str = f.replace(".md", "")
+        filepath = os.path.join("trends", f)
+        title = "제목 없음"
+        with open(filepath, "r", encoding="utf-8") as file:
+            for line in file:
+                if line.startswith("# 📰 "):
+                    title = line.replace("# 📰 ", "").strip()
+                    break
+                elif line.startswith("# "):
+                    title = line.replace("# ", "").strip()
+                    break
+        results.append({"date": date_str, "display": f"{date_str}: {title}"})
+    
+    # 최신순 정렬
+    results = sorted(results, key=lambda x: x["date"], reverse=True)
+    return results

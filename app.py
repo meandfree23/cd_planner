@@ -565,21 +565,44 @@ with tab3:
     
     col_t1, col_t2 = st.columns([1, 3])
     
+    import time
     import core.trend_agent
-    from core.trend_agent import get_all_trend_dates, load_trend_report, fetch_daily_trend_report
+    from core.trend_agent import get_all_trend_info, load_trend_report, fetch_daily_trend_report
     
-    dates = get_all_trend_dates()
+    trend_data = get_all_trend_info()
+    today_str = time.strftime('%Y-%m-%d')
+    today_exists = any(t["date"] == today_str for t in trend_data)
+    
+    # 자동 발굴 로직 (오늘 날짜가 없으면 즉시 실행)
+    if not today_exists:
+        try:
+            env_openai = st.secrets.get("OPENAI_API_KEY", os.getenv("OPENAI_API_KEY", ""))
+            if env_openai: os.environ["OPENAI_API_KEY"] = env_openai
+            env_tavily = st.secrets.get("TAVILY_API_KEY", os.getenv("TAVILY_API_KEY", ""))
+            if env_tavily: os.environ["TAVILY_API_KEY"] = env_tavily
+            
+            if os.getenv("OPENAI_API_KEY") and os.getenv("TAVILY_API_KEY"):
+                with st.spinner("🌍 오늘의 글로벌 마케팅/예술 트렌드를 자동 수집하고 있습니다... (최초 1회 약 15초 소요)"):
+                    fetch_daily_trend_report()
+                    st.rerun()
+        except:
+            pass
+            
+    # 데이터 리로드
+    trend_data = get_all_trend_info()
+    display_options = [t["display"] for t in trend_data]
+    display_to_date = {t["display"]: t["date"] for t in trend_data}
     
     with col_t1:
         st.markdown("#### 📅 리포트 보관함")
-        selected_date = None
-        if dates:
-            selected_date = st.radio("날짜 선택", dates, index=0)
+        selected_display = None
+        if display_options:
+            selected_display = st.radio("트렌드 리스트", display_options, index=0)
         else:
             st.write("아직 저장된 트렌드 리포트가 없습니다.")
             
         st.write("---")
-        if st.button("🔥 오늘의 인사이트 발굴하기", type="primary"):
+        if st.button("🔥 트렌드 수동 재발굴하기", type="primary"):
             try:
                 env_openai = st.secrets.get("OPENAI_API_KEY", os.getenv("OPENAI_API_KEY", ""))
                 if env_openai: os.environ["OPENAI_API_KEY"] = env_openai
@@ -595,16 +618,17 @@ with tab3:
             else:
                 with st.spinner("🌍 전 세계 마케팅 & 예술 트렌드를 스캔 중입니다... (약 15초 소요)"):
                     try:
-                        new_report = fetch_daily_trend_report()
-                        st.success("오늘의 인사이트 발굴 완료!")
+                        fetch_daily_trend_report()
+                        st.success("오늘의 인사이트 재발굴 완료!")
                         st.rerun()
                     except Exception as e:
                         st.error(f"오류가 발생했습니다: {str(e)}")
                         
     with col_t2:
-        if selected_date:
+        if selected_display:
+            selected_date = display_to_date[selected_display]
             report_content = load_trend_report(selected_date)
             if report_content:
                 st.markdown(report_content)
         else:
-            st.info("좌측에서 [오늘의 인사이트 발굴하기] 버튼을 눌러 첫 번째 트렌드를 찾아보세요.")
+            st.info("좌측에서 트렌드를 선택해 주세요.")
