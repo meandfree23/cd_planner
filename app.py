@@ -590,22 +590,34 @@ with tab3:
             
     # 데이터 리로드
     trend_data = get_all_trend_info()
-    display_options = [t["display"] for t in trend_data]
-    display_to_id = {t["display"]: t["file_id"] for t in trend_data}
+    
+    if "selected_trend_id" not in st.session_state:
+        st.session_state.selected_trend_id = trend_data[0]["file_id"] if trend_data else None
     
     with col_t1:
         st.markdown("#### 📅 리포트 보관함")
-        selected_display = None
-        if display_options:
-            selected_display = st.radio("트렌드 리스트", display_options, index=0)
+        
+        if trend_data:
+            # 커스텀 썸네일 리스트 뷰
+            for item in trend_data:
+                c1, c2 = st.columns([1, 2])
+                with c1:
+                    if item.get("image_url"):
+                        st.image(item["image_url"], use_column_width=True)
+                    else:
+                        st.info("No Image")
+                with c2:
+                    if st.button(item["display"], key=f"btn_{item['file_id']}", use_container_width=True):
+                        st.session_state.selected_trend_id = item["file_id"]
             
             # 개별 삭제 기능
-            st.write("") # 여백
-            if st.button("🗑️ 선택된 리포트 삭제", use_container_width=True):
-                selected_file_id = display_to_id[selected_display]
-                delete_trend_report(selected_file_id)
-                st.success("삭제되었습니다!")
-                st.rerun()
+            st.write("---")
+            if st.session_state.selected_trend_id:
+                if st.button("🗑️ 선택된 리포트 삭제", use_container_width=True):
+                    delete_trend_report(st.session_state.selected_trend_id)
+                    st.session_state.selected_trend_id = None
+                    st.success("삭제되었습니다!")
+                    st.rerun()
         else:
             st.write("아직 저장된 트렌드 리포트가 없습니다.")
             
@@ -628,14 +640,15 @@ with tab3:
                     try:
                         fetch_daily_trend_report()
                         st.success("오늘의 인사이트 재발굴 완료!")
+                        # 새 리포트가 생기면 선택을 초기화하여 방금 생성한 것을 보게 함
+                        st.session_state.selected_trend_id = None 
                         st.rerun()
                     except Exception as e:
                         st.error(f"오류가 발생했습니다: {str(e)}")
                         
     with col_t2:
-        if selected_display:
-            selected_file_id = display_to_id[selected_display]
-            report_content = load_trend_report(selected_file_id)
+        if st.session_state.selected_trend_id:
+            report_content = load_trend_report(st.session_state.selected_trend_id)
             if report_content:
                 st.markdown(report_content)
         else:

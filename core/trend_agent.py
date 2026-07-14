@@ -1,8 +1,16 @@
 import os
 import time
+import re
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_community.tools.tavily_search import TavilySearchResults
+from tavily import TavilyClient
+
+def extract_zeitgeist(llm) -> str:
+    prompt = ChatPromptTemplate.from_messages([
+        ("system", "당신은 시대의 흐름을 읽는 문화 철학자이자 트렌드 분석가입니다. 2026년 현재 전 세계를 관통하는 단 하나의 거대한 시대정신(Zeitgeist)을 영문 키워드로 3~5단어 내외로 도출하세요. (예: AI-Human Emotional Symbiosis, Post-truth Authenticity, Hyper-Personalized Reality 등). 부가 설명 없이 오직 영문 키워드만 정확하게 출력하세요.")
+    ])
+    response = llm.invoke(prompt.format_messages())
+    return response.content.strip()
 
 def fetch_daily_trend_report() -> str:
     """
@@ -10,36 +18,49 @@ def fetch_daily_trend_report() -> str:
     LLM을 통해 [현상-본질-적용] 형태의 마크다운 리포트를 생성합니다.
     """
     llm = ChatOpenAI(model="gpt-4o", temperature=0.7, max_retries=15)
-    search_tool = TavilySearchResults(max_results=5)
+    tavily = TavilyClient(api_key=os.environ.get("TAVILY_API_KEY"))
     
-    import random
-    # A24 특유의 유니크함/언더독 감성과 메이저 광고제의 권위를 믹스
-    marketing_awards = ["Cannes Lions", "Clio Awards", "New York Festivals", "D&AD", "Webby Awards"]
-    marketing_vibes = ["A24 style cinematic", "highly unique", "subversive and provocative", "indie aesthetic", "boundary pushing"]
-    m_award = random.choice(marketing_awards)
-    m_vibe = random.choice(marketing_vibes)
+    # 1. 시대정신(Zeitgeist) 도출
+    zeitgeist = extract_zeitgeist(llm)
     
-    art_flavors = ["digital media art", "large scale sculpture", "performance art", "kinetic art", "light installation", "immersive exhibition"]
-    a_flavor = random.choice(art_flavors)
+    # 2. 시대정신 기반 타겟 검색 및 이미지 추출
+    marketing_query = f"latest 2026 {zeitgeist} brand marketing campaign case study"
+    art_query = f"latest 2026 {zeitgeist} contemporary art new perspective exhibition"
     
-    # 1. 매번 다르고 신선한 정보를 수집하기 위해 검색어에 랜덤 테마 부여
-    marketing_query = f"latest {m_award} winning {m_vibe} brand marketing campaign case study 2024"
-    art_query = f"latest {a_flavor} contemporary art exhibition installation 2024"
+    try:
+        m_resp = tavily.search(query=marketing_query, include_images=True, max_results=5)
+        a_resp = tavily.search(query=art_query, include_images=True, max_results=5)
+        
+        m_images = m_resp.get("images", [])
+        a_images = a_resp.get("images", [])
+        
+        marketing_results = str(m_resp.get("results", []))
+        art_results = str(a_resp.get("results", []))
+        
+        rep_image_url = m_images[0] if m_images else (a_images[0] if a_images else "")
+    except Exception as e:
+        marketing_results = f"Search Failed: {str(e)}"
+        art_results = f"Search Failed: {str(e)}"
+        rep_image_url = ""
     
-    marketing_results = search_tool.invoke({"query": marketing_query})
-    art_results = search_tool.invoke({"query": art_query})
+    search_context = f"=== Marketing Search Results ({zeitgeist}) ===\n{marketing_results}\n\n=== Art Search Results ({zeitgeist}) ===\n{art_results}"
+    image_md = f"![대표 이미지]({rep_image_url})\n\n" if rep_image_url else ""
     
-    search_context = f"=== Marketing Search Results ({m_award}, {m_vibe}) ===\n{marketing_results}\n\n=== Art Search Results ({a_flavor}) ===\n{art_results}"
-    
-    # 2. LLM 분석 프롬프트
+    # 3. LLM 분석 프롬프트
     prompt = ChatPromptTemplate.from_messages([
         ("system", """당신은 전 세계의 트렌드를 꿰뚫어보는 최고 권위의 시니어 크리에이티브 디렉터이자 큐레이터입니다.
-주어진 최신 글로벌 검색 결과를 바탕으로, 가장 파괴적이고 영감을 주는 **마케팅 사례 1개**와 **예술 사례 1개**를 엄선하여 분석 리포트를 작성하세요.
+주어진 최신 글로벌 검색 결과를 바탕으로, 제시된 **시대정신(Zeitgeist)**과 완벽히 공명하는 가장 파괴적이고 영감을 주는 **마케팅 사례 1개**와 **예술 사례 1개**를 엄선하여 분석 리포트를 작성하세요.
+
+[선정 최우선 원칙]
+1. 반드시 2026년 최신 사례를 우선적으로 발굴하세요. 검색 결과에 적합한 2026년 사례가 도저히 없다면, 해당 시대정신과 가장 완벽하게 부합하는 과거 사례를 대신 선정하여 응용 가능성을 제시하세요.
+2. 예술(Art) 분야의 경우, 뻔한 전통적 접근보다는 새로운 매체, 새로운 시선, 파격적인 시도에 중점을 두어 신선한 관점을 제공하세요.
 
 [분석 및 출력 가이드 (마크다운 포맷)]
+{image_md}
 # 📰 [브랜드명] 15자 이내의 아주 간결한 인사이트 요약
 
 오늘의 발굴 날짜: {date}
+오늘의 시대정신: **{zeitgeist}**
 
 ## 🔥 Global Marketing Case: [선정된 캠페인 이름]
 - **현상 (What)**: 이 캠페인이 어떤 내용이며, 어떤 방식으로 사람들의 시선을 끌었는가?
@@ -61,10 +82,10 @@ def fetch_daily_trend_report() -> str:
     ])
     
     today_str = time.strftime("%Y년 %m월 %d일")
-    response = llm.invoke(prompt.format_messages(date=today_str, search_context=search_context))
+    response = llm.invoke(prompt.format_messages(image_md=image_md, date=today_str, zeitgeist=zeitgeist, search_context=search_context))
     report_content = response.content
     
-    # 3. 폴더 및 파일 저장 (누락 없이 누적하기 위해 타임스탬프 추가)
+    # 4. 폴더 및 파일 저장 (누락 없이 누적하기 위해 타임스탬프 추가)
     if not os.path.exists("trends"):
         os.makedirs("trends")
         
@@ -100,27 +121,31 @@ def get_all_trend_info() -> list:
     results = []
     for f in files:
         file_id = f.replace(".md", "")
-        # 파일명에서 날짜 추출 (예: 2024-07-14_123456 -> 2024-07-14)
         date_str = file_id.split("_")[0] if "_" in file_id else file_id
         
         filepath = os.path.join("trends", f)
         title = "제목 없음"
+        image_url = ""
+        
         with open(filepath, "r", encoding="utf-8") as file:
             for line in file:
+                # 첫 번째 이미지 URL 추출
+                if not image_url and line.startswith("!["):
+                    img_match = re.search(r'\!\[.*?\]\((.*?)\)', line)
+                    if img_match:
+                        image_url = img_match.group(1)
+                        
                 if line.startswith("# 📰 "):
                     title = line.replace("# 📰 ", "").strip()
-                    break
                 elif line.startswith("# "):
-                    title = line.replace("# ", "").strip()
-                    break
+                    if title == "제목 없음": # 이미 # 📰 로 찾았다면 건너뜀
+                        title = line.replace("# ", "").strip()
         
-        # UI에 노출될 간결한 문자열
         display_str = f"{date_str}: {title}"
         if len(display_str) > 40:
             display_str = display_str[:37] + "..."
             
-        results.append({"file_id": file_id, "date_str": date_str, "display": display_str})
+        results.append({"file_id": file_id, "date_str": date_str, "display": display_str, "image_url": image_url})
     
-    # 최신순 정렬 (file_id에 시간이 포함되어 있으므로 file_id 역순 정렬이 최신순임)
     results = sorted(results, key=lambda x: x["file_id"], reverse=True)
     return results
