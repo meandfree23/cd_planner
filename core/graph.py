@@ -1,12 +1,13 @@
 from langgraph.graph import StateGraph, END
 from core.state import PlannerState
-from core.nodes import web_search_node, parallel_ideation_node, synthesize_node, hook_strategy_node, parallel_report_node, report_merge_node, qa_judge_node, ppt_code_node, evaluation_node, evolution_proof_node
+from core.nodes import web_search_node, parallel_ideation_node, synthesize_node, hook_strategy_node, parallel_report_node, report_merge_node, qa_judge_node, ppt_code_node, evaluation_node, evolution_proof_node, brand_asset_extractor_node
 
 def build_planner_graph():
     """CD 플래너 에이전트의 워크플로우 그래프를 생성하고 컴파일합니다. (병렬 멀티 에이전트 적용)"""
     
     workflow = StateGraph(PlannerState)
     
+    workflow.add_node("brand_asset_extractor", brand_asset_extractor_node)
     workflow.add_node("web_search", web_search_node)
     workflow.add_node("parallel_ideation", parallel_ideation_node)
     workflow.add_node("synthesize", synthesize_node)
@@ -18,7 +19,8 @@ def build_planner_graph():
     workflow.add_node("evaluation", evaluation_node)
     workflow.add_node("evolution_proof", evolution_proof_node)
     
-    workflow.set_entry_point("web_search")
+    workflow.set_entry_point("brand_asset_extractor")
+    workflow.add_edge("brand_asset_extractor", "web_search")
     workflow.add_edge("web_search", "parallel_ideation")
     workflow.add_edge("parallel_ideation", "synthesize")
     workflow.add_edge("synthesize", "hook_strategy")

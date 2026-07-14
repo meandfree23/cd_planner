@@ -74,6 +74,67 @@ def get_openai_llm():
     # Rate Limit (429) 에러 방지를 위해 자동 재시도 횟수 대폭 증가
     return ChatOpenAI(model="gpt-4o", temperature=0.3, max_retries=15)
 
+def brand_asset_extractor_node(state: PlannerState) -> PlannerState:
+    print("--- [NODE] BRAND DEEP DIVE & SNS PERCEPTION ---")
+    url = state.get("brand_url", "").strip()
+    project_name = state.get("project_name", "")
+    llm = get_openai_llm()
+
+    scraped_text = ""
+    if url:
+        try:
+            print(f"Crawling brand URL: {url}")
+            headers = {'User-Agent': 'Mozilla/5.0'}
+            response = requests.get(url, headers=headers, timeout=10)
+            if response.status_code == 200:
+                soup = BeautifulSoup(response.content, 'html.parser')
+                scraped_text = " ".join([p.text for p in soup.find_all(['p', 'h1', 'h2', 'h3', 'li'])])
+                scraped_text = scraped_text[:5000] # 너무 길면 자름
+        except Exception as e:
+            print(f"URL Crawling Error: {e}")
+            scraped_text = "크롤링 실패 또는 접근 불가."
+
+    sns_text = ""
+    try:
+        if project_name:
+            print(f"Scanning SNS for {project_name}")
+            tavily = TavilyClient(api_key=os.environ.get("TAVILY_API_KEY", ""))
+            search_res = tavily.search(query=f"{project_name} 후기 OR site:twitter.com {project_name} 반응 OR site:instiz.net {project_name}", search_depth="basic", max_results=3)
+            sns_text = json.dumps(search_res.get('results', []), ensure_ascii=False)
+    except Exception as e:
+        print(f"Tavily Search Error: {e}")
+        sns_text = "SNS 검색 실패."
+
+    if not scraped_text and not sns_text:
+        state["brand_assets"] = "입력된 브랜드 정보가 부족하여 분석을 생략합니다."
+        return state
+
+    prompt = ChatPromptTemplate.from_messages([
+        ("system", """당신은 세계 최고의 '기업 본질 분석가 및 브랜드 전략가'입니다. 
+제공된 기업 웹사이트 크롤링 데이터와 SNS 직관적 반응(Tavily 검색 결과)을 분석하여 아래 5가지 핵심 항목을 추출하세요. 
+일반적이고 뻔한 이야기가 아닌, 해당 브랜드만이 가진 '고유의 오리지널리티(자산)'와 '현재 대중들의 날것의 평판'을 날카롭게 요약해야 합니다.
+
+[추출 항목]
+1. Brand Philosophy (브랜드 철학 및 본질)
+2. Signature Assets (시그니처 메뉴/서비스/제품/고유 기술)
+3. Core Differentiator (타사 대비 확실한 강점 및 베네핏)
+4. Brand Tone & Manner (브랜드 고유의 분위기와 무드)
+5. SNS Real-time Perception (소비자들의 직관적이고 날 것의 반응/평판)
+
+분석 결과를 마크다운 형식으로 명확하고 임팩트 있게 작성하세요."""),
+        ("user", "프로젝트명: {project_name}\n웹사이트 데이터: {scraped_text}\nSNS 반응 데이터: {sns_text}")
+    ])
+    
+    chain = prompt | llm
+    res = chain.invoke({
+        "project_name": project_name,
+        "scraped_text": scraped_text,
+        "sns_text": sns_text
+    })
+    
+    state["brand_assets"] = res.content
+    return state
+
 def web_search_node(state: PlannerState) -> PlannerState:
     print("--- [NODE] WEB SEARCH (DUCKDUCKGO) ---")
     brief = state["brief"]
@@ -696,24 +757,27 @@ def parallel_ideation_node(state: PlannerState) -> PlannerState:
     brief = state["brief"]
     web_context = state.get("web_context", "")
     eval_feedback = state.get("evaluation_feedback", "")
+    brand_assets = state.get("brand_assets", "")
     
     feedback_context = f"\n[🚨 자아비판 및 수정 지시]\n지난번 심사위원 검수에서 다음 뼈아픈 지적을 받았습니다. 이 피드백을 200% 수용하여 통계 수치와 구체적 벤치마크, 명확한 논리 구조를 덧붙여 기획을 전면 개편하세요:\n{eval_feedback}\n" if eval_feedback else ""
     
+    brand_context = f"\n[🏢 기업 자산 및 SNS 반응 심층 분석]\n아래의 분석된 기업 자산을 최우선 뼈대로 삼아 모든 기획을 전개하세요. 일반적인 트렌드 분석에 그치지 말고, 이 브랜드만의 오리지널리티(메뉴/철학)와 SNS에서의 날것의 평판을 결합하여 이 브랜드'만' 할 수 있는 고유한 전략을 도출하세요:\n{brand_assets}\n" if brand_assets and "미입력" not in brand_assets and "부족" not in brand_assets else ""
+
     llm = get_openai_llm()
     
     def run_research():
         prompt = ChatPromptTemplate.from_messages([
-            ("system", "당신은 최고 수준의 리서처입니다. 주어진 브리프와 웹 검색 컨텍스트를 바탕으로 타겟 소비자의 라이프스타일, 트렌드, 그리고 마이크로 트라이브(Micro-Tribe)를 3가지로 압축해 분석하세요.\n**[중요] 반드시 모든 문장과 단어를 한국어(Korean)로 상세하게 작성하세요.**\n{feedback_context}"),
+            ("system", "당신은 최고 수준의 리서처입니다. 주어진 브리프와 웹 검색 컨텍스트, 그리고 기업 자산을 바탕으로 타겟 소비자의 라이프스타일, 트렌드, 그리고 마이크로 트라이브(Micro-Tribe)를 3가지로 압축해 분석하세요.\n**[중요] 반드시 모든 문장과 단어를 한국어(Korean)로 상세하게 작성하세요.**\n{feedback_context}\n{brand_context}"),
             ("user", "브리프: {brief}\n웹 검색: {web_context}")
         ])
-        return (prompt | llm).invoke({"brief": brief, "web_context": web_context, "feedback_context": feedback_context}).content
+        return (prompt | llm).invoke({"brief": brief, "web_context": web_context, "feedback_context": feedback_context, "brand_context": brand_context}).content
 
     def run_analysis():
         prompt = ChatPromptTemplate.from_messages([
-            ("system", "당신은 예리한 전략 분석가입니다. 주어진 브리프와 웹 컨텍스트를 보고 타겟 소비자들이 겪고 있는 핵심 갈등과 컬처럴 텐션(Cultural Tension)을 3가지 도출하세요. 인과관계가 명확해야 합니다.\n**[중요] 반드시 모든 문장과 단어를 한국어(Korean)로 상세하게 작성하세요.**\n{feedback_context}"),
+            ("system", "당신은 예리한 전략 분석가입니다. 주어진 브리프와 기업 자산을 보고 타겟 소비자들이 겪고 있는 핵심 갈등과 컬처럴 텐션(Cultural Tension)을 3가지 도출하세요. 인과관계가 명확해야 합니다.\n**[중요] 반드시 모든 문장과 단어를 한국어(Korean)로 상세하게 작성하세요.**\n{feedback_context}\n{brand_context}"),
             ("user", "브리프: {brief}\n웹 검색: {web_context}")
         ])
-        return (prompt | llm).invoke({"brief": brief, "web_context": web_context, "feedback_context": feedback_context}).content
+        return (prompt | llm).invoke({"brief": brief, "web_context": web_context, "feedback_context": feedback_context, "brand_context": brand_context}).content
 
     # 1. First Phase: Research & Analysis (Parallel)
     with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
@@ -725,17 +789,17 @@ def parallel_ideation_node(state: PlannerState) -> PlannerState:
     # 2. Second Phase: Ideation & Marketing (Parallel, strictly based on Phase 1 results)
     def run_idea():
         prompt = ChatPromptTemplate.from_messages([
-            ("system", "당신은 파격적인 크리에이티브 디렉터입니다. 브리프와 수집된 트렌드, 그리고 **앞서 분석된 타겟 텐션(Tension)**을 바탕으로 소비자를 유혹할 애자일 크리에이티브 가설(Agile Idea) 3가지를 도출하세요. **특히 컨텍스트 내에 '최신 디자인/마케팅 트렌드'가 있다면 아이디어에 강제로 결합시켜 매우 동시대적인 제안을 만드세요.** 반드시 앞선 전략가의 '텐션 분석'을 본질적으로 해결하는 아이디어여야 합니다.\n**[중요] 반드시 모든 문장과 단어를 한국어(Korean)로 상세하게 작성하세요.**\n{feedback_context}"),
+            ("system", "당신은 파격적인 크리에이티브 디렉터입니다. 브리프와 기업 자산, **앞서 분석된 타겟 텐션(Tension)**을 바탕으로 소비자를 유혹할 애자일 크리에이티브 가설(Agile Idea) 3가지를 도출하세요. **특히 컨텍스트 내에 '최신 디자인/마케팅 트렌드'가 있다면 아이디어에 강제로 결합시켜 매우 동시대적인 제안을 만드세요.** 반드시 앞선 전략가의 '텐션 분석'과 브랜드의 '자체 자산'을 본질적으로 해결/활용하는 아이디어여야 합니다.\n**[중요] 반드시 모든 문장과 단어를 한국어(Korean)로 상세하게 작성하세요.**\n{feedback_context}\n{brand_context}"),
             ("user", "브리프: {brief}\n웹 검색: {web_context}\n\n전략가의 타겟/텐션 분석:\n{analysis_context}")
         ])
-        return (prompt | llm).invoke({"brief": brief, "web_context": web_context, "analysis_context": micro_tribe, "feedback_context": feedback_context}).content
+        return (prompt | llm).invoke({"brief": brief, "web_context": web_context, "analysis_context": micro_tribe, "feedback_context": feedback_context, "brand_context": brand_context}).content
         
     def run_marketing():
         prompt = ChatPromptTemplate.from_messages([
-            ("system", "당신은 퍼포먼스 마케터입니다. 브리프와 전략가의 '타겟/텐션 분석' 결과를 바탕으로, 이 타겟에게 도달하기 위한 핵심 매체 믹스, 예상 KPI(CPC/CTR), A/B 테스트 전략을 수립하세요.\n**[중요] 반드시 모든 문장과 단어를 한국어(Korean)로 상세하게 작성하세요.**\n{feedback_context}"),
+            ("system", "당신은 퍼포먼스 마케터입니다. 브리프와 전략가의 '타겟/텐션 분석', 그리고 '기업 자산' 결과를 바탕으로, 이 타겟에게 도달하기 위한 핵심 매체 믹스, 예상 KPI(CPC/CTR), A/B 테스트 전략을 수립하세요.\n**[중요] 반드시 모든 문장과 단어를 한국어(Korean)로 상세하게 작성하세요.**\n{feedback_context}\n{brand_context}"),
             ("user", "브리프: {brief}\n웹 검색: {web_context}\n\n전략가의 타겟/텐션 분석:\n{analysis_context}")
         ])
-        return (prompt | llm).invoke({"brief": brief, "web_context": web_context, "analysis_context": micro_tribe, "feedback_context": feedback_context}).content
+        return (prompt | llm).invoke({"brief": brief, "web_context": web_context, "analysis_context": micro_tribe, "feedback_context": feedback_context, "brand_context": brand_context}).content
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
         f_ide = executor.submit(run_idea)

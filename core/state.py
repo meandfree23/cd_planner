@@ -13,6 +13,8 @@ class PlannerState(TypedDict):
     goal: str
     tone_and_manner: str
     additional_context: str
+    brand_url: str
+    brand_assets: str
     
     # Hook Strategy Fields (V3)
     selected_hook_strategy: str

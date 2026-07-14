@@ -160,6 +160,7 @@ with tab1:
         ])
     
     additional_context = st.text_area("📝 추가 기획 배경 및 요구사항", height=100, placeholder="예: 경쟁사 '레드불'의 점유율을 뺏어오고 싶습니다.")
+    brand_url = st.text_input("🔗 브랜드/기업 공식 웹사이트 URL (선택)", placeholder="예: https://kimsungmin.co.kr/")
     
     # 파이프라인 하위 호환성을 위해 하나로 병합된 brief 텍스트 생성
     brief_input = f"[프로젝트/브랜드명]: {project_name}\n[핵심 타겟]: {target_audience}\n[목표]: {goal}\n[톤앤매너/훅 전략]: {tone_and_manner}\n[추가 배경]: {additional_context}"
@@ -211,6 +212,7 @@ with tab1:
             col1, col2 = st.columns(2)
             with col1:
                 st.subheader("💡 Analysis & Insights")
+                brand_asset_expander = st.expander("0. Brand Deep Dive & SNS Perception")
                 research_expander = st.expander("1. Deep Research (수집된 쿼리 및 데이터)")
                 analysis_expander = st.expander("2. Micro-Tribe Analysis")
                 insight_expander = st.expander("3. Cultural Tensions & Insight")
@@ -237,6 +239,7 @@ with tab1:
                     "goal": goal,
                     "tone_and_manner": tone_and_manner,
                     "additional_context": additional_context,
+                    "brand_url": brand_url,
                     "brief": brief_input,
                     "designer_feedback": merged_designer_feedback,
                     "revision_count": 0,
@@ -250,7 +253,12 @@ with tab1:
                         for key, value in output.items():
                             full_state.update(value)
                             
-                            if key == "parallel_ideation":
+                            if key == "brand_asset_extractor":
+                                status_text.info("기업 본질 및 SNS 반응 추출 완료!")
+                                with brand_asset_expander:
+                                    st.markdown(value.get("brand_assets", ""))
+                                    
+                            elif key == "parallel_ideation":
                                 rev = value.get("revision_count", 0)
                                 if rev > 0:
                                     status_text.warning(f"⚠️ [자가 학습 루프] 심사 점수 미달로 기획을 전면 재작성합니다! (재학습: {rev}/2회)")
