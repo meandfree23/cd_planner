@@ -588,7 +588,7 @@ with tab3:
                 with st.spinner("🌍 전 세계 마케팅 & 예술 트렌드를 스캔 중입니다... (약 15초 소요)"):
                     try:
                         new_report = fetch_daily_trend_report()
-                        st.success("오늘의 무앗딥 인사이트 발굴 완료!")
+                        st.success("오늘의 인사이트 발굴 완료!")
                         st.rerun()
                     except Exception as e:
                         st.error(f"오류가 발생했습니다: {str(e)}")

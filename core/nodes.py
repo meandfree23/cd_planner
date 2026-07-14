@@ -781,9 +781,9 @@ def synthesize_node(state: PlannerState) -> PlannerState:
     
     llm = get_openai_llm()
     
-    # 무앗딥(CSO) 통찰 추출
+    # 최고 전략 책임자(CSO) 통찰 추출
     prompt = ChatPromptTemplate.from_messages([
-        ("system", """당신은 듄의 '무앗딥(Muad'Dib)'처럼 과거의 인사이트와 현재의 SNS 흐름을 동시에 꿰뚫어 보는 최고 전략 책임자(CSO)입니다. 
+        ("system", """당신은 과거의 인사이트와 현재의 SNS 흐름을 동시에 꿰뚫어 보는 최고 전략 책임자(CSO)입니다. 
 아래 수집된 리서치(현재 SNS 흐름)와 텐션 분석, 그리고 기초 아이디어들을 바탕으로, **"지금 이 시대가 본질적으로 요구하는 거시적 결핍(Deficiency)과 이를 해결할 단 하나의 날카로운 시대적 전략 명제"**를 3~4문단으로 묵직하게 도출하세요.
 이 통찰은 기획서 전체를 관통하는 영혼(Soul)이 됩니다."""),
         ("user", "리서치 및 SNS 흐름:\n{res}\n\n타겟/텐션 분석:\n{ana}\n\n도출된 아이디어 가설:\n{ide}")
