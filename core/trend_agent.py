@@ -199,3 +199,51 @@ def get_all_trend_info() -> list:
     
     results = sorted(results, key=lambda x: x["file_id"], reverse=True)
     return results
+
+def regenerate_all_images() -> int:
+    """모든 트렌드 리포트의 본문을 분석하여 이미지를 정밀하게 재구성합니다."""
+    if not os.path.exists("trends"):
+        return 0
+        
+    count = 0
+    tavily_key = os.environ.get("TAVILY_API_KEY")
+    if not tavily_key:
+        return 0
+        
+    from tavily import TavilyClient
+    tavily = TavilyClient(api_key=tavily_key)
+    files = [f for f in os.listdir("trends") if f.endswith(".md")]
+    
+    import re
+    for f in files:
+        filepath = os.path.join("trends", f)
+        with open(filepath, "r", encoding="utf-8") as file:
+            content = file.read()
+            
+        # 본문에서 캠페인명 추출
+        campaign_match = re.search(r'## 🔥 Global Marketing Case:\s*(.*)', content)
+        if not campaign_match:
+            continue
+            
+        campaign_name = campaign_match.group(1).strip()
+        # [ ] 등 불필요한 기호 제거
+        campaign_name = re.sub(r'[\[\]]', '', campaign_name)
+        search_query = f"{campaign_name} brand marketing campaign high quality"
+        
+        try:
+            resp = tavily.search(query=search_query, include_images=True, max_results=1)
+            imgs = resp.get("images", [])
+            if imgs:
+                new_image = imgs[0]
+                # 기존 이미지 라인 삭제
+                lines = content.split('\n')
+                clean_lines = [line for line in lines if not line.startswith("![")]
+                new_content = f"![대표 이미지]({new_image})\n\n" + '\n'.join(clean_lines).strip()
+                
+                with open(filepath, "w", encoding="utf-8") as file_write:
+                    file_write.write(new_content)
+                count += 1
+        except Exception:
+            continue
+            
+    return count

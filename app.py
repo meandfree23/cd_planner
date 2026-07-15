@@ -622,29 +622,38 @@ with tab3:
             st.write("아직 저장된 트렌드 리포트가 없습니다.")
             
         st.write("---")
-        if st.button("🔥 트렌드 수동 재발굴하기", type="primary", use_container_width=True):
-            try:
-                env_openai = st.secrets.get("OPENAI_API_KEY", os.getenv("OPENAI_API_KEY", ""))
-                if env_openai: os.environ["OPENAI_API_KEY"] = env_openai
-                env_tavily = st.secrets.get("TAVILY_API_KEY", os.getenv("TAVILY_API_KEY", ""))
-                if env_tavily: os.environ["TAVILY_API_KEY"] = env_tavily
-            except:
-                pass
-                
-            if not os.getenv("OPENAI_API_KEY"):
-                st.error("OpenAI API Key가 설정되지 않았습니다.")
-            elif not os.getenv("TAVILY_API_KEY"):
-                st.error("Tavily API Key가 설정되지 않았습니다.")
-            else:
-                with st.spinner("🌍 전 세계 마케팅 & 예술 트렌드를 스캔 중입니다... (약 15초 소요)"):
-                    try:
-                        fetch_daily_trend_report()
-                        st.success("오늘의 인사이트 재발굴 완료!")
-                        # 새 리포트가 생기면 선택을 초기화하여 방금 생성한 것을 보게 함
-                        st.session_state.selected_trend_id = None 
-                        st.rerun()
-                    except Exception as e:
-                        st.error(f"오류가 발생했습니다: {str(e)}")
+        c_btn1, c_btn2 = st.columns(2)
+        with c_btn1:
+            if st.button("🔄 전체 썸네일 재구성", use_container_width=True):
+                with st.spinner("모든 리포트의 본문을 분석하여 최적의 이미지로 교체 중입니다..."):
+                    import core.trend_agent
+                    count = core.trend_agent.regenerate_all_images()
+                    st.success(f"{count}개의 썸네일이 완벽한 개연성으로 복구되었습니다!")
+                    st.rerun()
+        with c_btn2:
+            if st.button("🔥 트렌드 수동 재발굴", type="primary", use_container_width=True):
+                try:
+                    env_openai = st.secrets.get("OPENAI_API_KEY", os.getenv("OPENAI_API_KEY", ""))
+                    if env_openai: os.environ["OPENAI_API_KEY"] = env_openai
+                    env_tavily = st.secrets.get("TAVILY_API_KEY", os.getenv("TAVILY_API_KEY", ""))
+                    if env_tavily: os.environ["TAVILY_API_KEY"] = env_tavily
+                except:
+                    pass
+                    
+                if not os.getenv("OPENAI_API_KEY"):
+                    st.error("OpenAI API Key가 설정되지 않았습니다.")
+                elif not os.getenv("TAVILY_API_KEY"):
+                    st.error("Tavily API Key가 설정되지 않았습니다.")
+                else:
+                    with st.spinner("🌍 전 세계 마케팅 & 예술 트렌드를 스캔 중입니다... (약 15초 소요)"):
+                        try:
+                            fetch_daily_trend_report()
+                            st.success("오늘의 인사이트 재발굴 완료!")
+                            # 새 리포트가 생기면 선택을 초기화하여 방금 생성한 것을 보게 함
+                            st.session_state.selected_trend_id = None 
+                            st.rerun()
+                        except Exception as e:
+                            st.error(f"오류가 발생했습니다: {str(e)}")
                         
     with col_t2:
         if st.session_state.selected_trend_id:
