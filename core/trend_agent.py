@@ -56,7 +56,6 @@ def fetch_daily_trend_report() -> str:
 2. 예술(Art) 분야의 경우, 뻔한 전통적 접근보다는 새로운 매체, 새로운 시선, 파격적인 시도에 중점을 두어 신선한 관점을 제공하세요.
 
 [분석 및 출력 가이드 (마크다운 포맷)]
-{image_md}
 # 📰 [브랜드명] 15자 이내의 아주 간결한 인사이트 요약
 
 오늘의 발굴 날짜: {date}
@@ -77,13 +76,42 @@ def fetch_daily_trend_report() -> str:
 ## 💡 통합 인사이트 (The One Thing)
 - 오늘 발견한 두 사례(마케팅과 예술)를 관통하는 단 하나의 거대한 시대적 흐름이나 인사이트는 무엇인가?
 
+IMG_KEYWORD: [선정된 마케팅 캠페인의 가장 대표적인 시각적 이미지를 찾기 위한 3~5단어의 정확한 구글 이미지 검색어. 예: "Dove Real Cost Beauty campaign"]
+
 존댓말로 격식 있고 날카로운 카리스마를 담아, 한국어로 작성해주세요."""),
         ("user", "검색된 데이터:\n{search_context}")
     ])
     
     today_str = time.strftime("%Y년 %m월 %d일")
-    response = llm.invoke(prompt.format_messages(image_md=image_md, date=today_str, zeitgeist=zeitgeist, search_context=search_context))
+    response = llm.invoke(prompt.format_messages(date=today_str, zeitgeist=zeitgeist, search_context=search_context))
     report_content = response.content
+    
+    # 이미지 키워드 파싱 및 정밀 검색
+    rep_image_url = ""
+    img_keyword = ""
+    lines = report_content.split('\n')
+    clean_lines = []
+    for line in lines:
+        if line.startswith("IMG_KEYWORD:"):
+            img_keyword = line.replace("IMG_KEYWORD:", "").strip()
+        else:
+            clean_lines.append(line)
+            
+    report_content = '\n'.join(clean_lines).strip()
+    
+    if img_keyword:
+        try:
+            img_resp = tavily.search(query=img_keyword, include_images=True, max_results=1)
+            imgs = img_resp.get("images", [])
+            if imgs:
+                rep_image_url = imgs[0]
+        except Exception:
+            pass
+            
+    if not rep_image_url:
+        rep_image_url = "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=800&auto=format&fit=crop"
+        
+    report_content = f"![대표 이미지]({rep_image_url})\n\n" + report_content
     
     # 4. 폴더 및 파일 저장 (누락 없이 누적하기 위해 타임스탬프 추가)
     if not os.path.exists("trends"):
