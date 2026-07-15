@@ -141,6 +141,28 @@ def get_all_trend_info() -> list:
                     if title == "제목 없음": # 이미 # 📰 로 찾았다면 건너뜀
                         title = line.replace("# ", "").strip()
         
+        # 과거 리포트 중 이미지가 없는 경우, 즉석에서 검색하여 채워넣는 힐링 로직 (1회만 동작)
+        if not image_url and title != "제목 없음" and os.environ.get("TAVILY_API_KEY"):
+            try:
+                from tavily import TavilyClient
+                tavily = TavilyClient(api_key=os.environ.get("TAVILY_API_KEY"))
+                # 제목을 기반으로 이미지 검색
+                resp = tavily.search(query=title, include_images=True, max_results=1)
+                imgs = resp.get("images", [])
+                if imgs:
+                    image_url = imgs[0]
+                    # 파일 최상단에 이미지 추가하여 영구 저장
+                    with open(filepath, "r", encoding="utf-8") as file_read:
+                        content = file_read.read()
+                    with open(filepath, "w", encoding="utf-8") as file_write:
+                        file_write.write(f"![대표 이미지]({image_url})\n\n" + content)
+            except Exception:
+                pass
+        
+        # 최후의 보루: 검색 실패시 멋진 기본 아트 이미지 제공
+        if not image_url:
+            image_url = "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=800&auto=format&fit=crop"
+        
         display_str = f"{date_str}: {title}"
         if len(display_str) > 40:
             display_str = display_str[:37] + "..."
