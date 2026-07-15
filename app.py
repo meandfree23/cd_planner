@@ -624,11 +624,11 @@ with tab3:
         st.write("---")
         c_btn1, c_btn2 = st.columns(2)
         with c_btn1:
-            if st.button("🔄 전체 썸네일 재구성", use_container_width=True):
-                with st.spinner("모든 리포트의 본문을 분석하여 최적의 이미지로 교체 중입니다..."):
+            if st.button("🔄 전체 리포트 텍스트 전면 개조", use_container_width=True):
+                with st.spinner("과거 리포트들을 새로운 구체적 팩트 기반(80/20)으로 전면 재작성 중입니다... (약 1분 소요)"):
                     import core.trend_agent
-                    count = core.trend_agent.regenerate_all_images()
-                    st.success(f"{count}개의 썸네일이 완벽한 개연성으로 복구되었습니다!")
+                    count = core.trend_agent.rewrite_all_reports_content()
+                    st.success(f"{count}개의 리포트가 구체적인 팩트 중심으로 전면 개조되었습니다!")
                     st.rerun()
         with c_btn2:
             if st.button("🔥 트렌드 수동 재발굴", type="primary", use_container_width=True):

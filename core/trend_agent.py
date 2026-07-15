@@ -201,8 +201,8 @@ def get_all_trend_info() -> list:
     results = sorted(results, key=lambda x: x["file_id"], reverse=True)
     return results
 
-def regenerate_all_images() -> int:
-    """모든 트렌드 리포트의 본문을 분석하여 이미지를 정밀하게 재구성합니다."""
+def rewrite_all_reports_content() -> int:
+    """기존 리포트들의 주제(캠페인/작품명)를 추출하여 새로운 80/20 프롬프트로 본문을 전면 재작성합니다."""
     if not os.path.exists("trends"):
         return 0
         
@@ -213,38 +213,114 @@ def regenerate_all_images() -> int:
         
     from tavily import TavilyClient
     tavily = TavilyClient(api_key=tavily_key)
-    files = [f for f in os.listdir("trends") if f.endswith(".md")]
+    llm = ChatOpenAI(model="gpt-4o", temperature=0.7, max_retries=15)
     
+    files = [f for f in os.listdir("trends") if f.endswith(".md")]
     import re
+    
     for f in files:
         filepath = os.path.join("trends", f)
         with open(filepath, "r", encoding="utf-8") as file:
             content = file.read()
             
-        # 본문에서 캠페인명 추출
-        campaign_match = re.search(r'## 🔥 Global Marketing Case:\s*(.*)', content)
-        if not campaign_match:
+        # 1. 주제 추출
+        m_match = re.search(r'## 🔥 Global Marketing Case:\s*(.*)', content)
+        a_match = re.search(r'## 🎨 Contemporary Art Case:\s*(.*)', content)
+        z_match = re.search(r'오늘의 시대정신:\s*\*\*(.*?)\*\*', content)
+        
+        m_name = m_match.group(1).replace("[", "").replace("]", "").strip() if m_match else ""
+        a_name = a_match.group(1).replace("[", "").replace("]", "").strip() if a_match else ""
+        zeitgeist = z_match.group(1).strip() if z_match else "Cultural Evolution"
+        
+        if not m_name and not a_name:
             continue
             
-        campaign_name = campaign_match.group(1).strip()
-        # [ ] 등 불필요한 기호 제거
-        campaign_name = re.sub(r'[\[\]]', '', campaign_name)
-        search_query = f"{campaign_name} brand marketing campaign high quality"
+        # 2. 정밀 검색
+        m_query = f"{m_name} brand marketing campaign detailed case study"
+        a_query = f"{a_name} contemporary art exhibition detailed review"
         
         try:
-            resp = tavily.search(query=search_query, include_images=True, max_results=1)
-            imgs = resp.get("images", [])
-            if imgs:
-                new_image = imgs[0]
-                # 기존 이미지 라인 삭제
-                lines = content.split('\n')
-                clean_lines = [line for line in lines if not line.startswith("![")]
-                new_content = f"![대표 이미지]({new_image})\n\n" + '\n'.join(clean_lines).strip()
-                
-                with open(filepath, "w", encoding="utf-8") as file_write:
-                    file_write.write(new_content)
-                count += 1
+            m_resp = tavily.search(query=m_query, include_images=True, max_results=3)
+            a_resp = tavily.search(query=a_query, include_images=True, max_results=3)
+            
+            m_images = m_resp.get("images", [])
+            a_images = a_resp.get("images", [])
+            
+            marketing_results = str(m_resp.get("results", []))
+            art_results = str(a_resp.get("results", []))
+            
+            rep_image_url = m_images[0] if m_images else (a_images[0] if a_images else "")
         except Exception:
             continue
             
+        search_context = f"=== Marketing Search Results ===\n{marketing_results}\n\n=== Art Search Results ===\n{art_results}"
+        
+        # 3. 새로운 프롬프트로 재작성
+        prompt = ChatPromptTemplate.from_messages([
+            ("system", """당신은 전 세계의 트렌드를 꿰뚫어보는 최고 권위의 시니어 크리에이티브 디렉터이자 큐레이터입니다.
+주어진 검색 결과를 바탕으로, 다음의 두 사례를 완벽하게 분석하는 리포트를 재작성하세요.
+마케팅 타겟: {m_name}
+예술 타겟: {a_name}
+
+[선정 최우선 원칙]
+본문 작성 비율 원칙: **구체적인 팩트와 실행 내용(What) 80%, 핵심 인사이트(Why/How) 20%**의 비중을 엄격히 지키세요. 뜬구름 잡는 철학적 수사보다 "실제로 어떤 매체를 통해 어떤 비주얼과 카피, 어떤 기술로 대중과 소통했는지" 아주 구체적인 실행 디테일을 상세하게 서술해야 합니다.
+
+[분석 및 출력 가이드 (마크다운 포맷)]
+# 📰 [선정된 브랜드명 & 예술가명]: [어떤 파격적인 시도를 했는지 '구체적인 사실' 위주로 20자 이내 요약. 추상적 표현 절대 금지]
+
+오늘의 발굴 날짜: {date}
+오늘의 시대정신: **{zeitgeist}**
+
+## 🔥 Global Marketing Case: {m_name}
+- **구체적 실행 내용 (What - 80% 비중)**: 이 캠페인이 '실제로' 어떻게 집행되었는가? 어떤 매체, 어떤 비주얼, 어떤 이벤트와 카피를 사용했는지 매우 상세하고 구체적인 팩트 위주로 생생하게 서술하세요.
+- **핵심 인사이트 (Why - 10% 비중)**: 이것이 타겟 소비자의 어떤 텐션(Tension)을 정확히 찔렀는가?
+- **실무 적용 포인트 (How - 10% 비중)**: 이 구체적인 아이디어를 우리의 실무에 당장 어떻게 차용할 수 있는가?
+- **🔗 더 알아보기 (References)**: 이 사례의 실제 원문 기사 링크(검색 데이터 내 존재 시) 또는 추가 파악을 위한 [🔍 구글 검색](https://www.google.com/search?q=키워드) 및 [▶️ 유튜브 영상](https://www.youtube.com/results?search_query=키워드) 링크를 합쳐서 3개 내외로 첨부하세요.
+
+## 🎨 Contemporary Art Case: {a_name}
+- **구체적 전시 내용 (What - 80% 비중)**: 이 전시/작품은 '실제로' 어떻게 생겼으며 관객과 어떻게 상호작용하는가? 매체, 크기, 시각적 형태, 관람객의 동선 등을 눈에 그리듯 상세하고 구체적인 팩트 위주로 서술하세요.
+- **핵심 철학 (Why - 10% 비중)**: 이 작품이 우리 사회에 던지는 날카로운 미학적 메시지는 무엇인가?
+- **실무 적용 포인트 (How - 10% 비중)**: 이 구체적인 시각적/경험적 요소를 마케팅의 톤앤매너로 변환한다면 어떻게 써먹을 수 있는가?
+- **🔗 더 알아보기 (References)**: 이 작품의 실제 원문 링크(검색 데이터 내 존재 시) 또는 추가 파악을 위한 [🔍 구글 검색](https://www.google.com/search?q=키워드) 및 [▶️ 유튜브 영상](https://www.youtube.com/results?search_query=키워드) 링크를 합쳐서 3개 내외로 첨부하세요.
+
+## 💡 통합 인사이트 (The One Thing)
+- 오늘 발견한 두 사례(마케팅과 예술)를 관통하는 단 하나의 거대한 시대적 흐름이나 인사이트는 무엇인가? (2~3문장 이내)
+
+IMG_KEYWORD: [선정된 마케팅 캠페인의 가장 대표적인 시각적 이미지를 찾기 위한 3~5단어의 정확한 구글 이미지 검색어]
+
+존댓말로 격식 있고 날카로운 카리스마를 담아, 한국어로 작성해주세요."""),
+            ("user", "검색된 데이터:\n{search_context}")
+        ])
+        
+        date_str = f.split("_")[0] if "_" in f else time.strftime("%Y년 %m월 %d일")
+        response = llm.invoke(prompt.format_messages(date=date_str, zeitgeist=zeitgeist, m_name=m_name, a_name=a_name, search_context=search_context))
+        report_content = response.content
+        
+        img_keyword = ""
+        lines = report_content.split('\n')
+        clean_lines = []
+        for line in lines:
+            if line.startswith("IMG_KEYWORD:"):
+                img_keyword = line.replace("IMG_KEYWORD:", "").strip()
+            else:
+                clean_lines.append(line)
+        report_content = '\n'.join(clean_lines).strip()
+        
+        if img_keyword:
+            try:
+                img_resp = tavily.search(query=img_keyword, include_images=True, max_results=1)
+                imgs = img_resp.get("images", [])
+                if imgs: rep_image_url = imgs[0]
+            except Exception: pass
+            
+        if not rep_image_url:
+            rep_image_url = "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=800&auto=format&fit=crop"
+            
+        final_content = f"![대표 이미지]({rep_image_url})\n\n" + report_content
+        
+        with open(filepath, "w", encoding="utf-8") as file_write:
+            file_write.write(final_content)
+            
+        count += 1
+        
     return count
