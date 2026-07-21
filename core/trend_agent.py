@@ -162,13 +162,18 @@ def get_all_trend_info() -> list:
                 if not image_url and line.startswith("!["):
                     img_match = re.search(r'\!\[.*?\]\((.*?)\)', line)
                     if img_match:
-                        image_url = img_match.group(1)
-                        
+                        extracted = img_match.group(1).strip()
+                        # http로 시작하는 정상적인 URL만 허용
+                        if extracted.startswith("http"):
+                            image_url = extracted
+                            
                 if line.startswith("# 📰 "):
                     title = line.replace("# 📰 ", "").strip()
+                    title = title.replace("[", "").replace("]", "")
                 elif line.startswith("# "):
                     if title == "제목 없음": # 이미 # 📰 로 찾았다면 건너뜀
                         title = line.replace("# ", "").strip()
+                        title = title.replace("[", "").replace("]", "")
         
         # 과거 리포트 중 이미지가 없는 경우, 즉석에서 검색하여 채워넣는 힐링 로직 (1회만 동작)
         if not image_url and title != "제목 없음" and os.environ.get("TAVILY_API_KEY"):
