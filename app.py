@@ -659,6 +659,44 @@ with tab3:
         if st.session_state.selected_trend_id:
             report_content = load_trend_report(st.session_state.selected_trend_id)
             if report_content:
-                st.markdown(report_content)
+                if isinstance(report_content, dict):
+                    rep = report_content.get("report", {})
+                    
+                    st.header(f"📰 {rep.get('marketing_brand', '')} & {rep.get('art_name', '')}")
+                    st.caption(f"발굴 날짜: {report_content.get('date', '')} | 시대정신: **{report_content.get('zeitgeist', '')}**")
+                    
+                    image_url = report_content.get("image_url")
+                    if image_url:
+                        st.image(image_url, use_container_width=True)
+                        
+                    st.markdown("---")
+                    
+                    st.subheader("🔥 Global Marketing Case")
+                    st.markdown(f"**브랜드:** {rep.get('marketing_brand', '')}")
+                    st.markdown(f"**구체적 실행 내용 (What)**\n\n{rep.get('marketing_what', '')}")
+                    st.markdown(f"**핵심 인사이트 (Why)**\n\n{rep.get('marketing_why', '')}")
+                    st.markdown(f"**실무 적용 포인트 (How)**\n\n{rep.get('marketing_how', '')}")
+                    if rep.get("marketing_references"):
+                        st.markdown("**🔗 더 알아보기**")
+                        for ref in rep.get("marketing_references", []):
+                            st.markdown(f"- {ref}")
+                            
+                    st.markdown("---")
+                    
+                    st.subheader("🎨 Contemporary Art Case")
+                    st.markdown(f"**아티스트/전시명:** {rep.get('art_name', '')}")
+                    st.markdown(f"**구체적 전시 내용 (What)**\n\n{rep.get('art_what', '')}")
+                    st.markdown(f"**핵심 철학 (Why)**\n\n{rep.get('art_why', '')}")
+                    st.markdown(f"**실무 적용 포인트 (How)**\n\n{rep.get('art_how', '')}")
+                    if rep.get("art_references"):
+                        st.markdown("**🔗 더 알아보기**")
+                        for ref in rep.get("art_references", []):
+                            st.markdown(f"- {ref}")
+                            
+                    st.markdown("---")
+                    st.subheader("💡 통합 인사이트 (The One Thing)")
+                    st.info(rep.get("integration_insight", ""))
+                else:
+                    st.markdown(report_content)
         else:
             st.info("좌측에서 트렌드를 선택해 주세요.")
