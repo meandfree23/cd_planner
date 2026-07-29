@@ -311,11 +311,21 @@ def insight_node(state: PlannerState) -> PlannerState:
 
 
 def idea_node(state: PlannerState) -> PlannerState:
-    print("--- [NODE] IDEA (AGILE & MICRO-MOMENTS) ---")
+    print("--- [NODE] IDEA (AGILE & MICRO-MOMENTS & OPEN STRATEGY) ---")
     llm = get_openai_llm()
     
     prompt = ChatPromptTemplate.from_messages([
-        ("system", "당신은 세계적인 크리에이티브 디렉터입니다. 앞서 도출된 '팩트 기반의 단단한 분석(Reason Why)'을 바탕으로, 소비자에게 가장 효율적이고 치명적으로 다가갈 수 있는 파격적이고 추상적인 크리에이티브 '애자일 가설' 3가지와 '마이크로 모먼츠' 전략을 폭발시키세요. 분석 단계에서의 엄격함을 벗고, 이 단계에서는 철저히 소비자를 유혹하기 위한 창의적이고 추상적인 아이디어에 집중하세요. 마크다운으로 정리하세요."),
+        ("system", """당신은 세계적인 크리에이티브 디렉터입니다. 앞서 도초된 '팩트 기반의 분석(Reason Why)'을 바탕으로, 템플릿의 한계를 깨부수는 창의적 아이디어와 '마이크로 모먼츠' 전략을 도출하세요.
+
+[전략 한계 돌파 수칙]
+1. **이종 산업 은유 메타포 (Metaphor)**: 브리프에 지정된 메타포(예: 패션 하우스처럼, SF 영화처럼 등)가 존재한다면, 해당 메타포의 문법을 기획 전체에 파격적으로 이식하세요.
+2. **파격적 제약 조건 (Unorthodox Constraint)**: 브리프에 절대 금지/강제 사항이 지정되어 있다면, 뻔한 공식을 깨부수고 이를 엄격히 준수하세요.
+3. **3가지 극단적 전략 시나리오 (Divergent Routes)**: 
+   - **Route A [이성적 팩트 폭격형]**: 벤치마크 및 데이터 기반 정통 전략
+   - **Route B [문화적 텐션 기습형]**: 타겟의 숨겨진 열등감/욕망을 도발하는 전략
+   - **Route C [비대칭 언더독/파격형]**: 기존 판을 뒤흔드는 게릴라/안티마케팅 전략
+
+마크다운으로 명확하게 정리하세요."""),
         ("user", "브리프: {brief}\n\n트라이브 분석:\n{micro_tribe_analysis}\n\n텐션 및 인사이트:\n{cultural_tensions}")
     ])
     

@@ -159,11 +159,19 @@ with tab1:
             "📖 [감성] 초미시 페르소나 (Micro-Persona Empathy)"
         ])
     
-    additional_context = st.text_area("📝 추가 기획 배경 및 요구사항", height=100, placeholder="예: 경쟁사 '레드불'의 점유율을 뺏어오고 싶습니다.")
+    with st.expander("🔓 전략 한계 돌파 스튜디오 (Open Strategy Engine)", expanded=True):
+        st.caption("정형화된 템플릿의 한계를 깨부수는 파격적 전략 제약 및 메타포를 자유롭게 주입하세요.")
+        col_s1, col_s2 = st.columns(2)
+        with col_s1:
+            crossover_metaphor = st.text_input("🔀 이종 산업 은유 스위칭 (Metaphor)", placeholder="예: 이 커피 브랜드를 '하이엔드 명품 패션 하우스'처럼 기획해줘")
+        with col_s2:
+            unorthodox_constraint = st.text_input("⛔ 파격적 제약 주입 (Constraint)", placeholder="예: 절대 SNS 광고를 쓰지 말고, 소비자에게 미안함을 고백하며 시작해라")
+    
+    additional_context = st.text_area("📝 추가 기획 배경 및 요구사항", height=80, placeholder="예: 경쟁사 '레드불'의 점유율을 뺏어오고 싶습니다.")
     brand_url = st.text_input("🔗 브랜드/기업 공식 웹사이트 URL (선택)", placeholder="예: https://kimsungmin.co.kr/")
     
     # 파이프라인 하위 호환성을 위해 하나로 병합된 brief 텍스트 생성
-    brief_input = f"[프로젝트/브랜드명]: {project_name}\n[핵심 타겟]: {target_audience}\n[목표]: {goal}\n[톤앤매너/훅 전략]: {tone_and_manner}\n[추가 배경]: {additional_context}"
+    brief_input = f"[프로젝트/브랜드명]: {project_name}\n[핵심 타겟]: {target_audience}\n[목표]: {goal}\n[톤앤매너/훅 전략]: {tone_and_manner}\n[이종 산업 은유 메타포]: {crossover_metaphor}\n[파격적 제약 조건]: {unorthodox_constraint}\n[추가 배경]: {additional_context}"
     
     with st.expander("🧠 디자이너 피드백 지식창고 (RAG)", expanded=False):
         st.markdown("`report😁` 에이전트가 알려준 과거의 뼈아픈 역방향 피드백들을 이곳에 영구 저장해두세요. 파이프라인이 돌 때 이 지식창고를 전부 읽고 자동으로 기획에 반영합니다.")
