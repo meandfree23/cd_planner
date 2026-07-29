@@ -3,7 +3,6 @@ __pycache__/
 *.pyc
 .env
 .DS_Store
-reports/
 data/input_raw.txt
 data/latest_ppt_sync.txt
 data/sync_timestamp.txt

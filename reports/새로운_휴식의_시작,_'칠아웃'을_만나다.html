@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>새로운 휴식의 시작, '칠아웃'을 만나다</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Noto+Sans+KR:wght@300;400;600;800&family=Noto+Serif+KR:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.js"></script>
+  <style>
+    /* NAKED RESET */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Noto Sans KR', sans-serif; background: #E5E5E5; color: #111; line-height: 1.6; }
+    img { max-width: 100%; display: block; }
+    #export-controls { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; gap: 8px; }
+    .export-btn { background: #111; color: #fff; border: none; padding: 12px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.15); transition: transform 0.2s; font-family: 'Noto Sans KR', sans-serif;}
+    .export-btn:hover { transform: translateY(-2px); }
+
+    /* CORE STRUCTURAL CSS (Always present) */
+    .slide-container { display: flex; flex-direction: column; gap: 80px; padding: 40px; background: #E5E5E5; align-items: center; }
+    .slide-page { width: 100%; max-width: 1414px; aspect-ratio: 1.414 / 1; padding: 80px 100px; position: relative; overflow: hidden; display: flex; flex-direction: column; background: var(--bg, #fff); }
+    .layout-headline { justify-content: center; align-items: flex-start; }
+    .layout-headline h2 { width: 90%; margin-bottom: 40px; }
+    .layout-headline p { width: 70%; }
+    .layout-hero { padding: 0; justify-content: center; align-items: center; text-align: center; }
+    .layout-hero .img-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; }
+    .layout-hero .overlay { position: relative; z-index: 2; }
+    .layout-harmony { display: grid; grid-template-columns: 1fr 1.2fr; gap: 80px; align-items: center; height: 100%; }
+    .layout-harmony .img-side { width: 100%; height: 90%; object-fit: cover; }
+    .layout-stats { justify-content: center; }
+    .layout-stats .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; margin-top: 60px; }
+  </style>
+  <style id="dynamic-css">
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Noto+Sans+KR:wght@400;800;900&display=swap');
+
+    :root {
+      --bg: #FFFFFF;
+      --text: #000000;
+      --accent: #0022FF; /* Vivid Blue */
+      --border: #000000;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Noto Sans KR', sans-serif;
+      letter-spacing: -0.03em;
+    }
+
+    /* Typography Hierarchy */
+    h1, h2, h3, .huge-number {
+      font-family: 'Noto Sans KR', sans-serif;
+      font-weight: 900;
+      color: var(--text);
+      text-transform: uppercase;
+      line-height: 1.1;
+      word-break: keep-all;
+    }
+
+    h1 { font-size: 4.5rem; margin-bottom: 30px; letter-spacing: -0.05em; }
+    h2 { font-size: 3.5rem; margin-bottom: 24px; border-bottom: 4px solid var(--text); padding-bottom: 10px; display: inline-block; }
+    h3 { font-size: 1.8rem; margin-bottom: 16px; font-weight: 800; }
+
+    p, li, .fact-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1rem;
+      line-height: 1.6;
+      color: var(--text);
+      font-weight: 400;
+      word-break: keep-all;
+    }
+
+    /* A4 Landscape Slide Container */
+    .slide-container {
+      display: flex;
+      flex-direction: column;
+      gap: 80px;
+      padding: 40px;
+      background: #F0F0F0;
+      align-items: center;
+    }
+
+    .slide-page {
+      background: var(--bg);
+      width: 100%;
+      max-width: 1414px;
+      aspect-ratio: 1.414 / 1;
+      padding: 80px 100px;
+      border: 2px solid var(--text); /* 브루탈리즘 테두리 */
+      box-shadow: 12px 12px 0px var(--accent); /* 비비드 블루 그림자 */
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* 4 Distinct Layout Variations */
+    .layout-headline { justify-content: center; align-items: flex-start; }
+    .layout-headline h2 { font-size: 5rem; width: 90%; margin-bottom: 40px; border: none; }
+    .layout-headline p { font-size: 1.2rem; width: 70%; border-left: 4px solid var(--accent); padding-left: 20px; }
+
+    .layout-hero { padding: 0; justify-content: center; align-items: center; text-align: center; }
+    .layout-hero .img-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; filter: grayscale(100%); z-index: 1; }
+    .layout-hero .overlay { position: relative; z-index: 2; background: var(--bg); padding: 40px 60px; border: 4px solid var(--text); box-shadow: 8px 8px 0px var(--accent); }
+    .layout-hero h2 { font-size: 4rem; margin-bottom: 0; border: none; padding: 0; }
+
+    .layout-harmony { display: grid; grid-template-columns: 1fr 1.2fr; gap: 80px; align-items: center; height: 100%; }
+    .layout-harmony .img-side { width: 100%; height: 90%; object-fit: cover; filter: grayscale(100%); border: 2px solid var(--text); }
+
+    .layout-stats { justify-content: center; }
+    .layout-stats .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; margin-top: 60px; }
+    .layout-stats .stats-box { border-top: 4px solid var(--accent); padding-top: 20px; }
+
+    /* Visual & Decor Elements */
+    .brutal-img, .img-hero, .img-float-right {
+      filter: grayscale(100%) !important;
+      border: 2px solid var(--text);
+    }
+    .img-hero { width: 100%; height: 50vh; object-fit: cover; margin-bottom: 40px; }
+    .img-float-right { float: right; width: 45%; margin: 0 0 40px 40px; object-fit: cover; }
+    .circle-img { border-radius: 50%; aspect-ratio: 1/1; object-fit: cover; filter: grayscale(100%); border: 2px solid var(--text); }
+
+    /* Decoration Classes */
+    .marker-underline {
+      background: linear-gradient(180deg, transparent 60%, var(--accent) 60%);
+      padding: 0 4px;
+    }
+    .hand-drawn-circle {
+      position: relative;
+      display: inline-block;
+      z-index: 1;
+    }
+    .hand-drawn-circle::before {
+      content: ''; position: absolute; top: -5px; left: -10px; right: -10px; bottom: -5px;
+      border: 3px solid var(--accent); border-radius: 50% 40% 60% 40% / 40% 60% 40% 50%;
+      z-index: -1; transform: rotate(-2deg);
+    }
+
+    /* Artbook Typography */
+    .huge-number { font-size: 6rem; color: var(--accent); letter-spacing: -0.05em; }
+    .fact-label { font-size: 1rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text); }
+
+    .card { background: transparent !important; border: none !important; box-shadow: none !important; padding: 0 !important; }
+  </style>
+</head>
+<body>
+  <div id="capture-area">
+    <div class="slide-container">
+      <div class="slide-page layout-headline">
+        <h2>새로운 휴식의 시작, <span class="hand-drawn-circle">'칠아웃'</span>을 만나다</h2>
+        <p>퇴근 후, 술 대신 마시는<br>프리미엄 무알콜 릴랙스 음료<br>'칠아웃'을 제안합니다.</p>
+      </div>
+      <div class="slide-page layout-harmony">
+        <div>
+          <h2>회식 문화의 그늘</h2>
+          <p>강제적인 술자리 참석, 피할 수 없는 술 강요.<br>이제 변화가 필요합니다.<br>30대 직장인의 68%가 회식 문화에 불만을,<br>52%는 개인 시간을 더 원합니다.</p>
+        </div>
+        <img src="https://loremflickr.com/1000/800/office" alt="사진" class="img-side">
+      </div>
+      <div class="slide-page layout-stats">
+        <h2>무알콜 음료 시장의 급성장</h2>
+        <div class="stats-grid">
+          <div class="stats-box">
+            <div class="huge-number">32%</div>
+            <div class="fact-label">판매량 증가</div>
+          </div>
+          <div class="stats-box">
+            <div class="huge-number">5년</div>
+            <div class="fact-label">기간</div>
+          </div>
+          <div class="stats-box">
+            <div class="huge-number">30대</div>
+            <div class="fact-label">주요 소비층</div>
+          </div>
+        </div>
+      </div>
+      <div class="slide-page layout-harmony">
+        <div>
+          <h2>퇴근 후, 나만의 시간의 가치</h2>
+          <p>퇴근 후의 시간은 이제 더 이상 회식에 소비되지 않습니다.<br>30대 직장인들은 퇴근 후 70%가<br>개인적인 휴식과 취미 활동을 선호합니다.</p>
+        </div>
+        <img src="https://loremflickr.com/1000/800/relax" alt="사진" class="img-side">
+      </div>
+      <div class="slide-page layout-headline">
+        <h2>캠페인의 핵심 타겟</h2>
+        <p>30대 직장인들은 의미 없는 회식 문화에 지쳐 있으며,<br>퇴근 후의 소중한 시간을 더 가치 있게 보내고자 합니다.<br>'칠아웃'은 이들의 마이크로 모먼트를 공략합니다.</p>
+      </div>
+      <div class="slide-page layout-hero">
+        <img src="https://loremflickr.com/1000/800/relaxation" alt="사진" class="img-bg">
+        <div class="overlay">
+          <h2>새로운 휴식 문화의 제안</h2>
+          <p>이제는 변화할 때입니다.<br>'칠아웃'과 함께하는 새로운 휴식 문화,<br>술에 취하지 않고도 완벽하게 스트레스를 풀 수 있는 방법을 제안합니다.</p>
+        </div>
+      </div>
+      <div class="slide-page layout-stats">
+        <h2>마이크로 트라이브의 세분화</h2>
+        <div class="stats-grid">
+          <div class="stats-box">
+            <div class="huge-number">안티 플렉스 힐러스</div>
+            <div class="fact-label">절약과 실속</div>
+          </div>
+          <div class="stats-box">
+            <div class="huge-number">헬시 플레저 시커스</div>
+            <div class="fact-label">건강과 즐거움</div>
+          </div>
+          <div class="stats-box">
+            <div class="huge-number">디지털 디톡서스</div>
+            <div class="fact-label">오프라인 휴식</div>
+          </div>
+        </div>
+      </div>
+      <div class="slide-page layout-harmony">
+        <div>
+          <h2>브랜드 솔루션</h2>
+          <p>'칠아웃'은 내면의 만족을 제공하고,<br>건강과 즐거움을 동시에 충족시키며,<br>디지털 디톡스를 지원하는 이상적인 음료입니다.</p>
+        </div>
+        <img src="https://loremflickr.com/1000/800/solution" alt="사진" class="img-side">
+      </div>
+      <div class="slide-page layout-headline">
+        <h2>캠페인 전략</h2>
+        <p>마이크로 모먼츠를 공략하여,<br>'칠아웃'을 통해 스트레스를 해소하고<br>새로운 휴식 문화를 제안합니다.</p>
+      </div>
+      <div class="slide-page layout-hero">
+        <img src="https://loremflickr.com/1000/800/strategy" alt="사진" class="img-bg">
+        <div class="overlay">
+          <h2>결론 및 기대 효과</h2>
+          <p>'칠아웃'은 타겟의 갈등을 해소하며,<br>그들의 라이프스타일에 자연스럽게 녹아들 것입니다.<br>브랜드의 인지도를 높일 것입니다.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="export-controls">
+    <button class="export-btn" onclick="exportJPEG()">📸 JPEG로 저장</button>
+  </div>
+  <script>
+    function exportJPEG() {
+      const node = document.getElementById('capture-area');
+      const btn = document.querySelector('.export-btn');
+      btn.innerText = "⏳ 렌더링 중...";
+      htmlToImage.toJpeg(node, { quality: 0.95, backgroundColor: '#E5E5E5' })
+        .then(function (dataUrl) {
+          var link = document.createElement('a'); link.download = 'presentation_export.jpg'; link.href = dataUrl; link.click();
+          btn.innerText = "📸 JPEG로 저장";
+        }).catch(function (error) { console.error('Error!', error); btn.innerText = "❌ 오류 발생"; });
+    }
+  </script>
+</body>
+</html>
