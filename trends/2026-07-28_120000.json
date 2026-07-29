@@ -4,6 +4,8 @@
   "zeitgeist": "Hyper-Personalized Authenticity",
   "image_url": "https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=800&auto=format&fit=crop",
   "report": {
+    "category": "F&B/리테일",
+    "tags": ["#리얼보이스", "#사운드아트", "#초개인화"],
     "marketing_brand": "코카콜라 (Coca-Cola) & 리얼 보이스 캔",
     "marketing_what": "코카콜라는 2026년 글로벌 캠페인으로 음료 캔 뚜껑을 열면 AI가 소비자의 위치와 시간대, 날씨 데이터를 분석하여 따뜻한 응원의 음성 메시지(Real Voice)를 들려주는 감성 마케팅을 전개했습니다. 전 세계 10개 주요 도시에서 동시 진행되었으며, 소비자가 응답한 목소리를 수집해 거대 사운드 조형물로 재생성하는 2차 인터랙션을 유도했습니다.",
     "marketing_why": "대량 생산 브랜드의 일편단심 메시지에서 벗어나 개인의 일상적 순간과 감정에 정확히 밀착하는 초개인화된 진정성(Authenticity)을 전달했습니다.",

@@ -8,6 +8,9 @@ from pydantic import BaseModel, Field
 from tavily import TavilyClient
 
 class TrendReport(BaseModel):
+    category: str = Field(description="대표 산업/주제 카테고리 (예: 테크/AI, 패션/뷰티, F&B, 리테일/팝업, 현대미술 중 가장 부합하는 것 하나)")
+    tags: list[str] = Field(description="핵심 키워드 태그 3개 내외 (예: ['#AI', '#체험형팝업', '#인터랙티브아트'])")
+    
     marketing_brand: str = Field(description="마케팅 사례의 브랜드명 (특수기호 없이 깔끔하게, 영문/한글 병기 가능)")
     marketing_what: str = Field(description="캠페인의 구체적 실행 내용 (80% 비중, 팩트 중심, 반드시 자연스럽고 정갈한 한국어로 작성)")
     marketing_why: str = Field(description="캠페인의 핵심 인사이트 (10% 비중, 타겟의 텐션 자극 포인트, 반드시 한국어로 작성)")
@@ -67,7 +70,7 @@ def fetch_daily_trend_report() -> str:
 1. 반드시 2026년 최신 사례를 우선적으로 발굴하세요. (정 없다면 과거 사례 응용)
 2. 예술 분야는 새로운 매체, 파격적인 시도에 중점을 두세요.
 3. 본문 작성 비율 원칙: 구체적인 팩트와 실행 내용(What) 80%, 핵심 인사이트(Why/How) 20%의 비중을 엄격히 지키세요. 뜬구름 잡는 철학적 수사보다 "실제로 어떤 매체를 통해 어떤 비주얼과 카피로 소통했는지" 아주 구체적인 실행 디테일을 상세히 기술해야 합니다.
-4. **언어 작성 필수 원칙**: 해외 검색 결과 원문이 영문이더라도, 모든 설명 및 분석 내용(What, Why, How, 통합 인사이트 등)은 반드시 완벽하고 매끄러운 **한국어**로 번역 및 가공하여 서술해야 합니다. (브랜드명/아티스트명에만 영문 병기 허용)"""),
+4. **언어 및 분류 원칙**: 모든 설명 및 분석 내용(What, Why, How, 통합 인사이트 등)은 반드시 완벽하고 매끄러운 **한국어**로 번역 및 가공하여 서술해야 합니다. 또한 적절한 **카테고리**와 **태그(#키워드)** 3개를 함께 자동 도출하세요."""),
         ("user", "검색된 데이터:\n{search_context}")
     ])
     
@@ -162,6 +165,8 @@ def get_all_trend_info() -> list:
         md_path = os.path.join("trends", f"{file_id}.md")
         
         title = "제목 없음"
+        category = "전체"
+        tags = []
         image_url = ""
         
         if os.path.exists(json_path):
@@ -171,6 +176,8 @@ def get_all_trend_info() -> list:
                 rep = data.get("report", {})
                 m_brand = rep.get("marketing_brand", "마케팅 사례")
                 a_art = rep.get("art_name", "예술 사례")
+                category = rep.get("category", "테크/AI")
+                tags = rep.get("tags", ["#트렌드", "#크리에이티브"])
                 title = f"{m_brand} & {a_art}"
                 image_url = data.get("image_url", "")
             except Exception:
@@ -200,7 +207,15 @@ def get_all_trend_info() -> list:
         if len(display_str) > 40:
             display_str = display_str[:37] + "..."
             
-        results.append({"file_id": file_id, "date_str": date_str, "display": display_str, "image_url": image_url})
+        results.append({
+            "file_id": file_id,
+            "date_str": date_str,
+            "display": display_str,
+            "title": title,
+            "category": category,
+            "tags": tags,
+            "image_url": image_url
+        })
     
     results = sorted(results, key=lambda x: x["file_id"], reverse=True)
     return results
@@ -273,7 +288,7 @@ def rewrite_all_reports_content() -> int:
 예술 타겟: {a_name}
 원칙:
 1. 구체적인 팩트와 실행 내용(What) 80%, 인사이트(Why/How) 20%의 비중 엄수.
-2. **언어 작성 필수 원칙**: 해외 검색 데이터가 영문이더라도 모든 내용(What, Why, How, 통합 인사이트 등)은 반드시 한국어로 작성하세요. 브랜드/아티스트 명칭만 영문 병기가 허용됩니다."""),
+2. **언어 및 분류 원칙**: 모든 설명 및 분석 내용(What, Why, How, 통합 인사이트 등)은 반드시 한국어로 작성하세요. 카테고리와 태그(#키워드) 3개를 도출하세요."""),
             ("user", "검색 데이터:\n{search_context}")
         ])
         

@@ -597,9 +597,25 @@ with tab3:
     with col_t1:
         st.markdown("#### 📅 리포트 보관함")
         
-        if trend_data:
+        # 1. 검색 및 카테고리 필터 UI
+        search_kw = st.text_input("🔍 키워드 검색", placeholder="브랜드, 아티스트, 태그 검색", key="trend_search_kw")
+        selected_cat = st.selectbox("🏷️ 카테고리 필터", ["전체", "테크/AI", "패션/뷰티", "F&B/리테일", "현대미술"], key="trend_cat_filter")
+        
+        filtered_data = trend_data
+        if selected_cat != "전체":
+            filtered_data = [t for t in filtered_data if t.get("category") == selected_cat]
+        if search_kw.strip():
+            q = search_kw.strip().lower()
+            filtered_data = [
+                t for t in filtered_data 
+                if q in t.get("title", "").lower() 
+                or any(q in tag.lower() for tag in t.get("tags", [])) 
+                or q in t.get("display", "").lower()
+            ]
+        
+        if filtered_data:
             # 커스텀 썸네일 리스트 뷰
-            for item in trend_data:
+            for item in filtered_data:
                 c1, c2 = st.columns([1, 2])
                 with c1:
                     if item.get("image_url"):
@@ -619,7 +635,7 @@ with tab3:
                     st.success("삭제되었습니다!")
                     st.rerun()
         else:
-            st.write("아직 저장된 트렌드 리포트가 없습니다.")
+            st.info("검색 또는 필터 조건에 부합하는 트렌드가 없습니다.")
             
         st.write("---")
         c_btn1, c_btn2 = st.columns(2)
