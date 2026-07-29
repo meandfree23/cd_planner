@@ -8,19 +8,19 @@ from pydantic import BaseModel, Field
 from tavily import TavilyClient
 
 class TrendReport(BaseModel):
-    marketing_brand: str = Field(description="마케팅 사례의 브랜드명 (특수기호 없이 깔끔하게)")
-    marketing_what: str = Field(description="캠페인의 구체적 실행 내용 (80% 비중, 팩트 중심)")
-    marketing_why: str = Field(description="캠페인의 핵심 인사이트 (10% 비중, 타겟의 텐션 자극 포인트)")
-    marketing_how: str = Field(description="실무 적용 포인트 (10% 비중)")
+    marketing_brand: str = Field(description="마케팅 사례의 브랜드명 (특수기호 없이 깔끔하게, 영문/한글 병기 가능)")
+    marketing_what: str = Field(description="캠페인의 구체적 실행 내용 (80% 비중, 팩트 중심, 반드시 자연스럽고 정갈한 한국어로 작성)")
+    marketing_why: str = Field(description="캠페인의 핵심 인사이트 (10% 비중, 타겟의 텐션 자극 포인트, 반드시 한국어로 작성)")
+    marketing_how: str = Field(description="실무 적용 포인트 (10% 비중, 반드시 한국어로 작성)")
     marketing_references: list[str] = Field(description="추가 파악을 위한 기사, 구글, 유튜브 링크 (URL만 3개 이내)")
     
-    art_name: str = Field(description="예술 작품이나 전시명 (특수기호 없이 깔끔하게)")
-    art_what: str = Field(description="전시의 구체적 실행 내용 (80% 비중, 팩트 중심)")
-    art_why: str = Field(description="전시의 핵심 철학 (10% 비중)")
-    art_how: str = Field(description="실무 적용 포인트 (10% 비중)")
+    art_name: str = Field(description="예술 작품이나 전시명 (특수기호 없이 깔끔하게, 영문/한글 병기 가능)")
+    art_what: str = Field(description="전시의 구체적 실행 내용 (80% 비중, 팩트 중심, 반드시 자연스럽고 정갈한 한국어로 작성)")
+    art_why: str = Field(description="전시의 핵심 철학 (10% 비중, 반드시 한국어로 작성)")
+    art_how: str = Field(description="실무 적용 포인트 (10% 비중, 반드시 한국어로 작성)")
     art_references: list[str] = Field(description="추가 파악을 위한 원문, 구글, 유튜브 링크 (URL만 3개 이내)")
     
-    integration_insight: str = Field(description="두 사례를 관통하는 단 하나의 거대한 시대적 흐름이나 인사이트 (2~3문장)")
+    integration_insight: str = Field(description="두 사례를 관통하는 단 하나의 거대한 시대적 흐름이나 인사이트 (2~3문장, 반드시 한국어로 작성)")
     image_search_keyword: str = Field(description="선정된 마케팅 캠페인의 대표 시각 이미지를 찾기 위한 3~5단어의 정확한 구글 이미지 검색 영문 키워드")
 
 
@@ -34,8 +34,7 @@ def extract_zeitgeist(llm) -> str:
 def fetch_daily_trend_report() -> str:
     """
     Tavily를 통해 최신 글로벌 마케팅/예술 트렌드를 스캔하고, 
-    LLM을 통해 Structured JSON 형태의 리포트를 생성하여 저장합니다.
-    (기존 리턴값이 마크다운 문자열이었으나, 이제 JSON 덤프 문자열을 반환)
+    LLM을 통해 Structured JSON 형태의 한국어 리포트를 생성하여 저장합니다.
     """
     llm = ChatOpenAI(model="gpt-4o", temperature=0.7, max_retries=15)
     structured_llm = llm.with_structured_output(TrendReport)
@@ -67,7 +66,8 @@ def fetch_daily_trend_report() -> str:
 [선정 최우선 원칙]
 1. 반드시 2026년 최신 사례를 우선적으로 발굴하세요. (정 없다면 과거 사례 응용)
 2. 예술 분야는 새로운 매체, 파격적인 시도에 중점을 두세요.
-3. 본문 작성 비율 원칙: 구체적인 팩트와 실행 내용(What) 80%, 핵심 인사이트(Why/How) 20%의 비중을 엄격히 지키세요. 뜬구름 잡는 철학적 수사보다 "실제로 어떤 매체를 통해 어떤 비주얼과 카피로 소통했는지" 아주 구체적인 실행 디테일을 상세히 기술해야 합니다."""),
+3. 본문 작성 비율 원칙: 구체적인 팩트와 실행 내용(What) 80%, 핵심 인사이트(Why/How) 20%의 비중을 엄격히 지키세요. 뜬구름 잡는 철학적 수사보다 "실제로 어떤 매체를 통해 어떤 비주얼과 카피로 소통했는지" 아주 구체적인 실행 디테일을 상세히 기술해야 합니다.
+4. **언어 작성 필수 원칙**: 해외 검색 결과 원문이 영문이더라도, 모든 설명 및 분석 내용(What, Why, How, 통합 인사이트 등)은 반드시 완벽하고 매끄러운 **한국어**로 번역 및 가공하여 서술해야 합니다. (브랜드명/아티스트명에만 영문 병기 허용)"""),
         ("user", "검색된 데이터:\n{search_context}")
     ])
     
@@ -86,7 +86,7 @@ def fetch_daily_trend_report() -> str:
         except:
             pass
             
-    if not rep_image_url:
+    if not rep_image_url or not rep_image_url.startswith("http"):
         rep_image_url = "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=800&auto=format&fit=crop"
         
     final_data = {
@@ -114,11 +114,17 @@ def load_trend_report(file_id: str):
     md_path = f"trends/{file_id}.md"
     
     if os.path.exists(json_path):
-        with open(json_path, "r", encoding="utf-8") as f:
-            return json.load(f)
-    elif os.path.exists(md_path):
-        with open(md_path, "r", encoding="utf-8") as f:
-            return f.read()
+        try:
+            with open(json_path, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            pass
+    if os.path.exists(md_path):
+        try:
+            with open(md_path, "r", encoding="utf-8") as f:
+                return f.read()
+        except Exception:
+            pass
     return None
 
 def delete_trend_report(file_id: str) -> bool:
@@ -159,40 +165,34 @@ def get_all_trend_info() -> list:
         image_url = ""
         
         if os.path.exists(json_path):
-            with open(json_path, "r", encoding="utf-8") as file:
-                data = json.load(file)
-            title = f"{data['report']['marketing_brand']} & {data['report']['art_name']}"
-            image_url = data.get("image_url", "")
+            try:
+                with open(json_path, "r", encoding="utf-8") as file:
+                    data = json.load(file)
+                rep = data.get("report", {})
+                m_brand = rep.get("marketing_brand", "마케팅 사례")
+                a_art = rep.get("art_name", "예술 사례")
+                title = f"{m_brand} & {a_art}"
+                image_url = data.get("image_url", "")
+            except Exception:
+                title = "JSON 오류 리포트"
         elif os.path.exists(md_path):
-            with open(md_path, "r", encoding="utf-8") as file:
-                for line in file:
-                    if not image_url and line.startswith("!["):
-                        img_match = re.search(r'\!\[.*?\]\((.*?)\)', line)
-                        if img_match:
-                            extracted = img_match.group(1).strip()
-                            if extracted.startswith("http"):
-                                image_url = extracted
-                    if line.startswith("# 📰 "):
-                        title = line.replace("# 📰 ", "").strip().replace("[", "").replace("]", "")
-                    elif line.startswith("# "):
-                        if title == "제목 없음":
-                            title = line.replace("# ", "").strip().replace("[", "").replace("]", "")
-                            
-            if not image_url and title != "제목 없음" and os.environ.get("TAVILY_API_KEY"):
-                try:
-                    from tavily import TavilyClient
-                    tavily = TavilyClient(api_key=os.environ.get("TAVILY_API_KEY"))
-                    resp = tavily.search(query=title, include_images=True, max_results=1)
-                    imgs = resp.get("images", [])
-                    if imgs:
-                        image_url = imgs[0]
-                        with open(md_path, "r", encoding="utf-8") as file_read:
-                            content = file_read.read()
-                        with open(md_path, "w", encoding="utf-8") as file_write:
-                            file_write.write(f"![대표 이미지]({image_url})\n\n" + content)
-                except Exception:
-                    pass
-                    
+            try:
+                with open(md_path, "r", encoding="utf-8") as file:
+                    for line in file:
+                        if not image_url and line.startswith("!["):
+                            img_match = re.search(r'\!\[.*?\]\((.*?)\)', line)
+                            if img_match:
+                                extracted = img_match.group(1).strip()
+                                if extracted.startswith("http"):
+                                    image_url = extracted
+                        if line.startswith("# 📰 "):
+                            title = line.replace("# 📰 ", "").strip().replace("[", "").replace("]", "")
+                        elif line.startswith("# "):
+                            if title == "제목 없음":
+                                title = line.replace("# ", "").strip().replace("[", "").replace("]", "")
+            except Exception:
+                title = "MD 오류 리포트"
+                
         if not image_url or not image_url.startswith("http"):
             image_url = "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=800&auto=format&fit=crop"
             
@@ -206,7 +206,7 @@ def get_all_trend_info() -> list:
     return results
 
 def rewrite_all_reports_content() -> int:
-    """기존 MD 리포트들을 읽어 새로운 Structured JSON 폼으로 완전히 개조하고 기존 파일을 삭제합니다."""
+    """기존 MD 및 JSON 리포트들을 읽어 최신 한국어 Structured JSON 포맷으로 전면 재작성합니다."""
     if not os.path.exists("trends"):
         return 0
         
@@ -219,26 +219,41 @@ def rewrite_all_reports_content() -> int:
     llm = ChatOpenAI(model="gpt-4o", temperature=0.7, max_retries=15)
     structured_llm = llm.with_structured_output(TrendReport)
     
-    files = [f for f in os.listdir("trends") if f.endswith(".md")]
+    files = [f for f in os.listdir("trends") if f.endswith(".md") or f.endswith(".json")]
     
     for f in files:
         filepath = os.path.join("trends", f)
-        with open(filepath, "r", encoding="utf-8") as file:
-            content = file.read()
-            
-        # 1. 과거 MD 구조에서 대략적인 정보 추출
-        m_match = re.search(r'## 🔥 Global Marketing Case:\s*(.*)', content)
-        a_match = re.search(r'## 🎨 Contemporary Art Case:\s*(.*)', content)
-        z_match = re.search(r'오늘의 시대정신:\s*\*\*(.*?)\*\*', content)
+        m_name = ""
+        a_name = ""
+        zeitgeist = "Cultural Evolution"
         
-        m_name = m_match.group(1).replace("[", "").replace("]", "").strip() if m_match else ""
-        a_name = a_match.group(1).replace("[", "").replace("]", "").strip() if a_match else ""
-        zeitgeist = z_match.group(1).strip() if z_match else "Cultural Evolution"
+        if f.endswith(".json"):
+            try:
+                with open(filepath, "r", encoding="utf-8") as file:
+                    data = json.load(file)
+                rep = data.get("report", {})
+                m_name = rep.get("marketing_brand", "")
+                a_name = rep.get("art_name", "")
+                zeitgeist = data.get("zeitgeist", "Cultural Evolution")
+            except Exception:
+                continue
+        elif f.endswith(".md"):
+            try:
+                with open(filepath, "r", encoding="utf-8") as file:
+                    content = file.read()
+                m_match = re.search(r'## 🔥 Global Marketing Case:\s*(.*)', content)
+                a_match = re.search(r'## 🎨 Contemporary Art Case:\s*(.*)', content)
+                z_match = re.search(r'오늘의 시대정신:\s*\*\*(.*?)\*\*', content)
+                
+                m_name = m_match.group(1).replace("[", "").replace("]", "").strip() if m_match else ""
+                a_name = a_match.group(1).replace("[", "").replace("]", "").strip() if a_match else ""
+                zeitgeist = z_match.group(1).strip() if z_match else "Cultural Evolution"
+            except Exception:
+                continue
         
         if not m_name and not a_name:
             continue
             
-        # 2. 정밀 검색 (새로운 팩트 발굴)
         m_query = f"{m_name} brand marketing campaign detailed case study"
         a_query = f"{a_name} contemporary art exhibition detailed review"
         
@@ -256,7 +271,9 @@ def rewrite_all_reports_content() -> int:
             ("system", """당신은 시니어 디렉터입니다. 검색 결과를 바탕으로 기존 리포트를 완벽하게 재작성하세요.
 마케팅 타겟: {m_name}
 예술 타겟: {a_name}
-원칙: 구체적인 팩트와 실행 내용(What) 80%, 인사이트(Why/How) 20%의 비중 엄수. 뜬구름 잡는 표현 배제."""),
+원칙:
+1. 구체적인 팩트와 실행 내용(What) 80%, 인사이트(Why/How) 20%의 비중 엄수.
+2. **언어 작성 필수 원칙**: 해외 검색 데이터가 영문이더라도 모든 내용(What, Why, How, 통합 인사이트 등)은 반드시 한국어로 작성하세요. 브랜드/아티스트 명칭만 영문 병기가 허용됩니다."""),
             ("user", "검색 데이터:\n{search_context}")
         ])
         
@@ -266,7 +283,6 @@ def rewrite_all_reports_content() -> int:
         except Exception:
             continue
             
-        # 4. 이미지 갱신
         rep_image_url = ""
         if result.image_search_keyword:
             try:
@@ -275,10 +291,10 @@ def rewrite_all_reports_content() -> int:
                 if imgs: rep_image_url = imgs[0]
             except Exception: pass
             
-        if not rep_image_url:
+        if not rep_image_url or not rep_image_url.startswith("http"):
             rep_image_url = "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=800&auto=format&fit=crop"
             
-        file_id = f.replace(".md", "")
+        file_id = f.replace(".md", "").replace(".json", "")
         date_str = file_id.split("_")[0] if "_" in file_id else time.strftime("%Y-%m-%d")
         
         final_data = {
@@ -289,11 +305,13 @@ def rewrite_all_reports_content() -> int:
             "report": result.model_dump()
         }
         
-        with open(f"trends/{file_id}.json", "w", encoding="utf-8") as file_write:
+        json_target = os.path.join("trends", f"{file_id}.json")
+        with open(json_target, "w", encoding="utf-8") as file_write:
             json.dump(final_data, file_write, ensure_ascii=False, indent=2)
             
-        # 성공하면 구형 MD 파일 완전 삭제!
-        os.remove(filepath)
+        if f.endswith(".md") and os.path.exists(filepath):
+            os.remove(filepath)
+            
         count += 1
         
     return count

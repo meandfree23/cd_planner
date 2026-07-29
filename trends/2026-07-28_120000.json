@@ -1,0 +1,26 @@
+{
+  "format_version": 2,
+  "date": "2026년 07월 28일",
+  "zeitgeist": "Hyper-Personalized Authenticity",
+  "image_url": "https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=800&auto=format&fit=crop",
+  "report": {
+    "marketing_brand": "코카콜라 (Coca-Cola) & 리얼 보이스 캔",
+    "marketing_what": "코카콜라는 2026년 글로벌 캠페인으로 음료 캔 뚜껑을 열면 AI가 소비자의 위치와 시간대, 날씨 데이터를 분석하여 따뜻한 응원의 음성 메시지(Real Voice)를 들려주는 감성 마케팅을 전개했습니다. 전 세계 10개 주요 도시에서 동시 진행되었으며, 소비자가 응답한 목소리를 수집해 거대 사운드 조형물로 재생성하는 2차 인터랙션을 유도했습니다.",
+    "marketing_why": "대량 생산 브랜드의 일편단심 메시지에서 벗어나 개인의 일상적 순간과 감정에 정확히 밀착하는 초개인화된 진정성(Authenticity)을 전달했습니다.",
+    "marketing_how": "제품 패키지나 QR코드 접점에서 단순 할인 쿠폰 대신 사용자의 상황별 감정을 터치하는 오디오 브랜딩 메시지를 결합할 수 있습니다.",
+    "marketing_references": [
+      "https://www.google.com/search?q=Coca+Cola+Real+Voice+Campaign+2026",
+      "https://www.youtube.com/results?search_query=Coca+Cola+Sound+Activation"
+    ],
+    "art_name": "사비 세에레 (Xavi Ceerre) & 도시 소음 오케스트라",
+    "art_what": "바르셀로나 출신의 미디어 아티스트 사비 세에레는 도시 곳곳의 공사 소음과 경적 소리를 마이크로 수집하여 아름다운 앰비언트 클래식 음악으로 변환하는 라이브 사운드 인스톨레이션을 선보였습니다. 삭막한 도심의 소음을 예술적 힐링 자산으로 재해석한 파격적 실험이었습니다.",
+    "art_why": "일상의 일탈적 요소(소음, 스트레스)를 긍정적인 미학으로 반전시키는 시선의 전환을 제시했습니다.",
+    "art_how": "소비자가 꺼려하는 페인 포인트(피로감, 대기 시간 등)를 브랜드의 유쾌한 혜택이나 재미 요소로 바꿈시키는 도발적 기획 톤앤매너로 활용 가능합니다.",
+    "art_references": [
+      "https://www.google.com/search?q=Xavi+Ceerre+Sound+Art+2026",
+      "https://www.youtube.com/results?search_query=Xavi+Ceerre+Exhibition"
+    ],
+    "integration_insight": "일상의 익숙한 매체(음료 캔, 도시 소음)에 AI 기술과 감각적 전환을 더해 개인화된 위로와 몰입을 전하는 진정성 전략이 돋보입니다.",
+    "image_search_keyword": "Coca Cola Real Voice Campaign 2026"
+  }
+}

@@ -603,7 +603,7 @@ with tab3:
                 c1, c2 = st.columns([1, 2])
                 with c1:
                     if item.get("image_url"):
-                        st.image(item["image_url"], use_column_width=True)
+                        st.image(item["image_url"], use_container_width=True)
                     else:
                         st.info("No Image")
                 with c2:
