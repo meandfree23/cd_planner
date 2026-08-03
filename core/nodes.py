@@ -367,7 +367,7 @@ def performance_marketing_node(state: PlannerState) -> PlannerState:
 
 def report_sec1_node(state: PlannerState) -> PlannerState:
     print("--- [NODE] REPORT SEC 1: 환경 분석 및 통계 ---")
-    llm = get_mini_llm()
+    llm = get_openai_llm()
     heidi_notes = get_heidi_design_notes()
     
     brand_assets = state.get("brand_assets", "")
@@ -375,34 +375,26 @@ def report_sec1_node(state: PlannerState) -> PlannerState:
     brand_context = f"\n[🏢 기업 자산 및 기획의 핵심 전략 명제(Blueprint)]\n이 기획서는 뜬구름 잡는 일반론이 되어서는 안 됩니다. 아래의 기업 고유 자산과 CSO의 전략 명제를 반드시 뼈대로 삼아 작성하세요:\n{brand_assets}\n{blueprint}\n" if (brand_assets or blueprint) else ""
     
     prompt = ChatPromptTemplate.from_messages([
-        ("system", """당신은 총 30페이지 분량의 [심층 결과 분석 보고서] 중 전반부(약 10~12장)를 작성하는 최고 수준의 비즈니스 및 전략 컨설턴트입니다.
+        ("system", """당신은 총 30페이지 분량의 [심층 결과 분석 보고서] 중 초반부(1~10장)를 담당하는 최고의 시니어 디렉터입니다.
 
 [절대 금지 사항 - 위반 시 실패]
-1. "이 프레젠테이션은 기획팀, 마케팅팀, CD가 조율한 결과입니다" 또는 "우리는 A/B 테스트를 통해 검증했습니다"와 같은 [기획의 과정이나 방법론(메타 발언)]을 절대 언급하지 마세요. 방법론은 백그라운드에 감추고 오직 도출된 [구체적인 결과와 날카로운 분석]만 이야기하세요.
-2. 겉핥기식의 요약된 문장을 쓰지 마세요.
-3. [분석의 절대 원칙]: 절대 '추가 정보가 필요하다'며 작성을 포기하거나 거절하지 마세요. 데이터가 부족하더라도 수집된 최소한의 팩트들을 엮어, 명확한 인과관계(Reason Why)가 증명된 논리적 추론으로 내용을 당당하게 100% 완성하세요.
+1. "기획의 과정이나 방법론"에 대한 메타 발언을 금지하고, 오로지 도출된 [구체적인 결과와 날카로운 분석]만 작성하세요.
+2. 겉핥기식의 요약문이나 축약된 슬라이드를 절대 쓰지 마세요. 생략 없이 모든 슬라이드를 최고 밀도로 작성해야 합니다.
 
 지금은 **[Part 1: 현상 분석 및 원인 규명 - HOOK & ATTENTION]** 파트입니다.
-특히 도입부(Slide 1~3)는 다음의 심리학적 훅(Hook) 전략을 철저히 반영하여 카피와 논리를 강렬하게 각색하세요:
-- 선택된 훅 전략: {hook_strategy}
-- 훅 설계 의도: {hook_reasoning}
+선택된 훅 전략: {hook_strategy} / 설계 의도: {hook_reasoning}
 
-작성 규칙:
-1. 타겟 분석과 기획의 논리적 뼈대가 부족하지 않도록, 이 파트에서만 **반드시 10장~12장 분량**으로 매우 밀도 있게 슬라이드를 확장해서 작성하세요. 다음 핵심 내용들이 충분히 세분화되어 슬라이드(## Slide X)로 전개되어야 합니다:
-   - [브랜드/주제 소개 및 탄생 배경]
-   - [기존 시장/경쟁 환경의 한계와 고질적 문제점]
-   - [브랜드/제품만의 독보적 기술 또는 전략적 특장점]
-   - [주요 성과, 파트너십 또는 초기 반응 지표]
-   - [실질적인 소비자 혜택 및 효용 가치 지표]
-   - [과거부터 현재까지의 시장 가치 변화 또는 트렌드 추이]
-   - [최근 거시적 시장 동향과 브랜드의 현재 위치]
-   - (위 내용을 바탕으로 각각 1~2장씩 슬라이드를 배정해 깊이를 파고드세요)
-2. 각 슬라이드의 [PT 스크립트]는 대단히 길고, 풍부하고, 구체적인 논술형이어야 합니다. (슬라이드당 최소 300자 이상)
-3. 수집된 데이터(리서치, 통계 수치)를 적극 활용하여, 대상 현상 이면에 숨겨진 '결정적 원인'을 심층적으로 파고드세요.
-4. 최소 2개 이상의 슬라이드에는 현상을 직관적으로 증명하는 `mermaid` 차트 코드를 삽입하세요.
+[각 슬라이드(## Slide X) 고밀도 필수 작성 표준 포맷]:
+모든 슬라이드는 생략 없이 아래 4가지 항목을 철저하게 모두 세분화하여 서술해야 합니다:
+- **Key Takeaway**: 슬라이드가 전달하고자 하는 단 하나의 핵심 결론 (1문장)
+- **1. 객관적 팩트 & 시장 데이터 (Objectivity & Facts)**: 리서치 수치, 통계, 타겟 스탯 등 객관적 근거 (80% 비중)
+- **2. 전략적 주관 & 크리에이티브 인사이트 (Subjectivity & Strategy)**: 데이터에 대한 디렉터의 주관적 크리에이티브 해석 및 텐션 조율 (20% 비중)
+- **3. 구체적 실행 & 비주얼 디테일 (Execution & Detail)**: 비주얼 톤앤매너, 매체 실행 디테일
+- **🎙️ PT 스크립트**: 발표자가 1.5~2분간 낭독할 수 있는 최소 400자 이상의 장문 발표 대본
+
+슬라이드 1장부터 10장까지 위 포맷을 엄격히 유지하며 밀도 높게 연이어 작성하세요.
 
 {heidi_notes}
-{feedback_context}
 {brand_context}"""),
         ("user", "브리프: {brief}\n\n분석 기반 데이터:\n{research_data}\n{performance_data}")
     ])
@@ -424,7 +416,7 @@ def report_sec1_node(state: PlannerState) -> PlannerState:
 
 def report_sec2_node(state: PlannerState) -> PlannerState:
     print("--- [NODE] REPORT SEC 2: 타겟 분석 및 전략 ---")
-    llm = get_mini_llm()
+    llm = get_openai_llm()
     heidi_notes = get_heidi_design_notes()
     
     brand_assets = state.get("brand_assets", "")
