@@ -397,7 +397,8 @@ with tab2:
         os.makedirs("reports")
         
     report_files = [f for f in os.listdir("reports") if f.endswith(".md") and not f.endswith("_eval.md")]
-    report_files.sort(key=lambda x: os.path.getmtime(os.path.join("reports", x)), reverse=True)
+    # 타임스탬프 동률 시 파일명을 보조 키로 사용하여 정렬 안정성 보장
+    report_files.sort(key=lambda x: (os.path.getmtime(os.path.join("reports", x)), x), reverse=True)
     
     if not report_files:
         st.info("아직 보관된 기획서가 없습니다. '기획안 생성기' 탭에서 첫 기획서를 생성해보세요!")
