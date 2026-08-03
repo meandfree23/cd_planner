@@ -396,7 +396,16 @@ with tab2:
     if not os.path.exists("reports"):
         os.makedirs("reports")
         
-    report_files = [f for f in os.listdir("reports") if f.endswith(".md") and not f.endswith("_eval.md")]
+    deleted_log_path = os.path.join("reports", "deleted_reports.json")
+    deleted_list = []
+    if os.path.exists(deleted_log_path):
+        try:
+            with open(deleted_log_path, "r", encoding="utf-8") as f:
+                deleted_list = json.load(f)
+        except Exception:
+            deleted_list = []
+            
+    report_files = [f for f in os.listdir("reports") if f.endswith(".md") and not f.endswith("_eval.md") and f not in deleted_list]
     # 타임스탬프 동률 시 파일명을 보조 키로 사용하여 정렬 안정성 보장
     report_files.sort(key=lambda x: (os.path.getmtime(os.path.join("reports", x)), x), reverse=True)
     
@@ -417,6 +426,10 @@ with tab2:
                 # 상하 여백을 주어 버튼 위치 조정
                 st.write("")
                 if st.button("🗑️", key=f"del_out_{rf}", help="영구 삭제"):
+                    if rf not in deleted_list:
+                        deleted_list.append(rf)
+                        with open(deleted_log_path, "w", encoding="utf-8") as f:
+                            json.dump(deleted_list, f, ensure_ascii=False, indent=2)
                     for ext in ['.md', '.txt', '_eval.md', '.html', '.pptx']:
                         target = os.path.join("reports", rf.replace('.md', ext))
                         if os.path.exists(target):
